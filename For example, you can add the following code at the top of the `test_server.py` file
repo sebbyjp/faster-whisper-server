@@ -1,0 +1,2 @@
+import sys
+sys.path.insert(0, '/path/to/real_time_transcription_server')
