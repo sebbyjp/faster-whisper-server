@@ -100,7 +100,7 @@ class RealTimeTranscriptionServer(AbstractRealTimeTranscriptionServer):
                 asyncio.create_task(self.stream_json(agent2_stream))
 
     async def transcribe_audio(self, audio_chunk):
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession() as session:  # noqa: SIM117
             async with session.post(self.whisper_api_url, data=audio_chunk) as response:
                 async for line in response.content:
                     transcribed_word = json.loads(line.decode())["transcription"]
