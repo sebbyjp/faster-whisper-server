@@ -1,0 +1,11 @@
+def process_state(arg1, arg2, arg3):
+    # Function implementation
+    pass
+
+def update_audio_out(arg1):
+    # Function implementation
+    pass
+
+# Example corrected calls
+process_state(arg1, arg2, arg3)  # Ensure 3 arguments are passed
+update_audio_out(arg1)  # Ensure only 1 argument is passed
