@@ -157,7 +157,7 @@ class WhisperConfig(BaseModel):
     compute_type: Quantization = Field(default=Quantization.DEFAULT)
     flash_attention: bool = True
 
-class Config(BaseSettings):
+class AudioConfig(BaseSettings):
     """Configuration for the application. Values can be set via environment variables.
 
     Pydantic will automatically handle mapping uppercased environment variables to the corresponding fields.
@@ -171,7 +171,7 @@ class Config(BaseSettings):
     host: str = Field(alias="UVICORN_HOST", default="0.0.0.0")
     port: int = Field(alias="UVICORN_PORT", default=7543)
 
-    enable_ui: bool = True
+    enable_ui: bool = False
     """
     Whether to enable the Gradio UI. You may want to disable this if you want to minimize the dependencies.
     """
@@ -196,5 +196,4 @@ class Config(BaseSettings):
     Should be greater than `max_inactivity_seconds`
     """
 
-
-config = Config()
+config = AudioConfig()

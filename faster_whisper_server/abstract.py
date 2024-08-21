@@ -78,42 +78,11 @@ class RealTimeTranscriptionServer(AbstractRealTimeTranscriptionServer):
         super().__init__(whisper_api_url, agent1_url, agent2_url, samplerate, blocksize)
         self.speech_engine = pyttsx3.init()
 
-    async def handle_audio_stream(self):
-        with sd.InputStream(callback=self.audio_callback, samplerate=self.samplerate, blocksize=self.blocksize):
-            await asyncio.sleep(60 * 60)  # Keep the stream open for 1 hour
 
-    def audio_callback(self, indata, frames, time, status):
-        if status:
-            print(status, flush=True)
-        audio_chunk = indata.tobytes()
-        asyncio.create_task(self.process_audio_chunk(audio_chunk))
-
-    async def process_audio_chunk(self, audio_chunk):
-        async for transcribed_word in self.transcribe_audio(audio_chunk):
-            self.current_sentence += f" {transcribed_word}".strip()
-            if self.is_instruction(self.current_sentence):
-                instruction = self.current_sentence
-                self.current_sentence = ""
-                agent1_stream = self.process_agent(self.agent1_url, instruction)
-                agent2_stream = self.process_agent(self.agent2_url, instruction)
-                asyncio.create_task(self.stream_speech(agent1_stream))
-                asyncio.create_task(self.stream_json(agent2_stream))
-
-    async def transcribe_audio(self, audio_chunk):
-        async with aiohttp.ClientSession() as session:  # noqa: SIM117
-            async with session.post(self.whisper_api_url, data=audio_chunk) as response:
-                async for line in response.content:
-                    transcribed_word = json.loads(line.decode())["transcription"]
-                    yield transcribed_word
 
     def is_instruction(self, sentence):
         return sentence.endswith(".")
 
-    async def process_agent(self, agent_url, instruction):
-        async with aiohttp.ClientSession() as session:
-            async with session.post(agent_url, json={"instruction": instruction}) as response:
-                async for line in response.content:
-                    yield line.decode()
 
     async def stream_speech(self, agent_stream):
         async for chunk in agent_stream:

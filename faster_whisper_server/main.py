@@ -28,7 +28,7 @@ from pydantic import AfterValidator
 
 from faster_whisper_server.asr import FasterWhisperASR
 from faster_whisper_server.audio import AudioStream, audio_samples_from_file
-from faster_whisper_server.config import (
+from faster_whisper_server.audio_config import (
     SAMPLES_PER_SECOND,
     Language,
     ResponseFormat,
