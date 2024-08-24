@@ -68,6 +68,7 @@ dependencies = [
   "pydantic==2.8.2",
   "pydantic-core==2.20.1",
   "pydantic-settings==2.3.4",
+  "pydantic[dotenv]",
   "pydub==0.25.1",
   "pygments==2.18.0",
   "pyparsing==3.1.2",
