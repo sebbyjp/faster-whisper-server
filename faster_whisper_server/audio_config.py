@@ -165,8 +165,6 @@ class AudioConfig(BaseSettings):
     the environment variable `LOG_LEVEL` will be mapped to `log_level`, `WHISPER_MODEL` to `whisper.model`, etc.
     """
 
-    model_config = SettingsConfigDict(env_nested_delimiter="__")
-
     log_level: str = "debug"
     host: str = Field(alias="UVICORN_HOST", default="0.0.0.0")
     port: int = Field(alias="UVICORN_PORT", default=7543)
@@ -195,5 +193,10 @@ class AudioConfig(BaseSettings):
     Controls how many latest seconds of audio are being passed through VAD.
     Should be greater than `max_inactivity_seconds`
     """
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+        env_nested_delimiter = "__"
 
 config = AudioConfig()
