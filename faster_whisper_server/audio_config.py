@@ -1,7 +1,7 @@
 import enum
 
 from pydantic import BaseModel, Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseSettings
 
 SAMPLES_PER_SECOND = 16000
 BYTES_PER_SAMPLE = 2
