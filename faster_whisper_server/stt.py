@@ -25,6 +25,7 @@ from TTS.api import TTS
 from faster_whisper_server.audio_config import AudioConfig
 from faster_whisper_server.audio_task import (
     TaskConfig,
+    get_audio_settings,
     get_audio_state,
     handle_audio_stream,
     update_audio_state,
@@ -366,9 +367,10 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
                 audio_state["model"] = model
                 for state, transcription, transcription_tps in handle_audio_stream(
                     audio,
-                    audio_state,
                     0.0,
                     http_client,
+                    audio_state,
+                    audio_settings=get_audio_settings(),
                 ):
                     update_audio_state(state)
                     yield get_audio_state(), transcription, transcription_tps
@@ -475,5 +477,4 @@ if __name__ == "__main__":
         show_error=True,
         debug=True,
         root_path="/instruct",
-        server_port=range(7861, 7871)  # Try ports 7861 to 7870
-    )
+        server_port=7862)
