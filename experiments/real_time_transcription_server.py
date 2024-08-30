@@ -1,15 +1,15 @@
-import asyncio
-import aiohttp
-import sounddevice as sd
 import json
 
+import aiohttp
+
+
 class RealTimeTranscriptionServer:
-    def __init__(self, whisper_api_url, agent1_url, agent2_url):
+    def __init__(self, whisper_api_url, agent1_url, agent2_url) -> None:
         self.whisper_api_url = whisper_api_url
         self.agent1_url = agent1_url
         self.agent2_url = agent2_url
 
-    async def handle_audio_stream(self):
+    async def handle_audio_stream(self) -> None:
         # Implement the logic to handle the audio stream
         pass
 
@@ -27,7 +27,7 @@ class RealTimeTranscriptionServer:
             content = await response.content.read()
             yield json.loads(content.decode())
 
-    async def stream_speech(self, agent_stream):
+    async def stream_speech(self, agent_stream) -> None:
         # Implement the logic to stream the speech
         # Removed pyttsx3 import and usage
         pass
@@ -41,6 +41,6 @@ class RealTimeTranscriptionServer:
         # Implement the logic to extract the JSON
         return json.loads(json_string)
 
-    async def process_audio_chunk(self, audio_chunk):
+    async def process_audio_chunk(self, audio_chunk) -> None:
         # Implement the logic to process the audio chunk
         pass

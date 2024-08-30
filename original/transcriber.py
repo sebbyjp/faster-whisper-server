@@ -3,8 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from faster_whisper_server.audio import Audio, AudioStream
-from faster_whisper_server.audio_config import config
-from faster_whisper_server.core import Transcription, Word, common_prefix, to_full_sentences, word_to_text
+from faster_whisper_server.config import config
+from faster_whisper_server.core import (
+    Transcription,
+    Word,
+    common_prefix,
+    to_full_sentences,
+)
 from faster_whisper_server.logger import logger
 
 if TYPE_CHECKING:
@@ -32,16 +37,30 @@ class LocalAgreement:
 
         return prefix
 
+    @classmethod
+    def prompt(cls, confirmed: Transcription) -> str | None:
+        sentences = to_full_sentences(confirmed.words)
+        if len(sentences) == 0:
+            return None
+        return sentences[-1].text
 
-# TODO: needs a better name
+    # TODO: better name
+    @classmethod
+    def needs_audio_after(cls, confirmed: Transcription) -> float:
+        full_sentences = to_full_sentences(confirmed.words)
+        return full_sentences[-1].end if len(full_sentences) > 0 else 0.0
+
+
 def needs_audio_after(confirmed: Transcription) -> float:
     full_sentences = to_full_sentences(confirmed.words)
-    return full_sentences[-1][-1].end if len(full_sentences) > 0 else 0.0
+    return full_sentences[-1].end if len(full_sentences) > 0 else 0.0
 
 
 def prompt(confirmed: Transcription) -> str | None:
     sentences = to_full_sentences(confirmed.words)
-    return word_to_text(sentences[-1]) if len(sentences) > 0 else None
+    if len(sentences) == 0:
+        return None
+    return sentences[-1].text
 
 
 async def audio_transcriber(

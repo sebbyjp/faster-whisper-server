@@ -18,12 +18,12 @@ def pytest_configure() -> None:
         logger.disabled = True
 
 
-@pytest.fixture()
+@pytest.fixture
 def client() -> Generator[TestClient, None, None]:
     with TestClient(app) as client:
         yield client
 
 
-@pytest.fixture()
+@pytest.fixture
 def openai_client(client: TestClient) -> OpenAI:
     return OpenAI(api_key="cant-be-empty", http_client=client)

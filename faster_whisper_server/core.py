@@ -5,12 +5,13 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 
-from faster_whisper_server.config import config
+from faster_whisper_server.audio_config import config
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
     import faster_whisper.transcribe
+from lager import log
 
 
 class Word(BaseModel):
@@ -292,3 +293,31 @@ def test_common_prefix_and_canonicalization() -> None:
     a = [word("A..."), word("B?"), word("C,")]
     b = [word("a??"), word("  b"), word(" ,c")]
     assert common_prefix(a, b) == [word("A..."), word("B?"), word("C,")]
+
+
+
+class LocalAgreement:
+    def __init__(self) -> None:
+        self.unconfirmed = Transcription()
+
+    def merge(self, confirmed: Transcription, incoming: Transcription) -> list[Word]:
+        # https://github.com/ufal/whisper_streaming/blob/main/whisper_online.py#L264
+        incoming = incoming.after(confirmed.end - 0.1)
+        prefix = common_prefix(incoming.words, self.unconfirmed.words)
+        log.debug(f"Confirmed: {confirmed.text}")
+        log.debug(f"Unconfirmed: {self.unconfirmed.text}")
+        log.debug(f"Incoming: {incoming.text}")
+
+        if len(incoming.words) > len(prefix):
+            self.unconfirmed = Transcription(incoming.words[len(prefix) :])
+        else:
+            self.unconfirmed = Transcription()
+
+        return prefix
+
+
+# TODO: needs a better name
+def needs_audio_after(confirmed: Transcription) -> float:
+    full_sentences = to_full_sentences(confirmed.words)
+    return full_sentences[-1][-1].end if len(full_sentences) > 0 else 0.0
+

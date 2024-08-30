@@ -15,8 +15,35 @@ class ResponseFormat(enum.StrEnum):
     TEXT = "text"
     JSON = "json"
     VERBOSE_JSON = "verbose_json"
-    SRT = "srt"
-    VTT = "vtt"
+    # NOTE: While inspecting outputs of these formats with `curl`, I noticed there's one or two "\n" inserted at the end of the response. # noqa: E501
+
+    # VTT = "vtt" # TODO
+    # 1
+    # 00:00:00,000 --> 00:00:09,220
+    # In his video on Large Language Models or LLMs, OpenAI co-founder and YouTuber Andrej Karpathy
+    #
+    # 2
+    # 00:00:09,220 --> 00:00:12,280
+    # likened LLMs to operating systems.
+    #
+    # 3
+    # 00:00:12,280 --> 00:00:13,280
+    # Karpathy said,
+    #
+    # SRT = "srt" # TODO
+    # WEBVTT
+    #
+    # 00:00:00.000 --> 00:00:09.220
+    # In his video on Large Language Models or LLMs, OpenAI co-founder and YouTuber Andrej Karpathy
+    #
+    # 00:00:09.220 --> 00:00:12.280
+    # likened LLMs to operating systems.
+    #
+    # 00:00:12.280 --> 00:00:13.280
+    # Karpathy said,
+    #
+    # 00:00:13.280 --> 00:00:19.799
+    # I see a lot of equivalence between this new LLM OS and operating systems of today.
 
 
 class Device(enum.StrEnum):
@@ -35,7 +62,7 @@ class Quantization(enum.StrEnum):
     FLOAT16 = "float16"
     BFLOAT16 = "bfloat16"
     FLOAT32 = "float32"
-    DEFAULT = "bfloat16"
+    DEFAULT = "default"
 
 
 class Language(enum.StrEnum):
@@ -147,7 +174,7 @@ class Task(enum.StrEnum):
 
 
 class WhisperConfig(BaseModel):
-    model: str = Field(default="Systran/faster-distil-whisper-large-v3")
+    model: str = Field(default="ctranslate2-4you/whisper-large-v3-ct2-bfloat16")
     """
     Huggingface model to use for transcription. Note, the model must support being ran using CTranslate2.
     Models created by authors of `faster-whisper` can be found at https://huggingface.co/Systran
@@ -155,10 +182,9 @@ class WhisperConfig(BaseModel):
     """
     inference_device: Device = Field(default=Device.AUTO)
     compute_type: Quantization = Field(default=Quantization.DEFAULT)
-    flash_attention: bool = True
+    attn_implementation: str = "flash_attention_2"
 
-
-class AudioConfig(BaseSettings):
+class Config(BaseSettings):
     """Configuration for the application. Values can be set via environment variables.
 
     Pydantic will automatically handle mapping uppercased environment variables to the corresponding fields.
@@ -166,27 +192,14 @@ class AudioConfig(BaseSettings):
     the environment variable `LOG_LEVEL` will be mapped to `log_level`, `WHISPER_MODEL` to `whisper.model`, etc.
     """
 
-    model_config = SettingsConfigDict(
-        cli_parse_args=False,
-        extra="ignore",
-        env_file=".env",
-        env_file_encoding="utf-8",
-        env_nested_delimiter="__",
-    )
+    model_config = SettingsConfigDict(env_nested_delimiter="__")
+
     log_level: str = "debug"
-    host: str = Field(alias="UVICORN_HOST", default="0.0.0.0")
-    port: int = Field(alias="UVICORN_PORT", default=7543)
-
-    enable_ui: bool = False
-    """
-    Whether to enable the Gradio UI. You may want to disable this if you want to minimize the dependencies.
-    """
-
-    default_language: Language | None = None
+    default_language: Language | None = Language.EN
     default_response_format: ResponseFormat = ResponseFormat.JSON
     whisper: WhisperConfig = WhisperConfig()
     max_models: int = 1
-    max_no_data_seconds: float = 1.0
+    max_no_data_seconds: float = 6.0
     """
     Max duration to for the next audio chunk before transcription is finilized and connection is closed.
     """
@@ -203,4 +216,4 @@ class AudioConfig(BaseSettings):
     """
 
 
-config = AudioConfig()
+config = Config()

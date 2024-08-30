@@ -2,13 +2,11 @@ from abc import ABC, abstractmethod
 import asyncio
 import json
 
-import aiohttp
 import pyttsx3
-import sounddevice as sd
 
 
 class AbstractRealTimeTranscriptionServer(ABC):
-    def __init__(self, whisper_api_url, agent1_url, agent2_url, samplerate=16000, blocksize=1024):
+    def __init__(self, whisper_api_url, agent1_url, agent2_url, samplerate=16000, blocksize=1024) -> None:
         self.whisper_api_url = whisper_api_url
         self.agent1_url = agent1_url
         self.agent2_url = agent2_url
@@ -19,62 +17,51 @@ class AbstractRealTimeTranscriptionServer(ABC):
     @abstractmethod
     async def handle_audio_stream(self):
         """Start capturing audio and processing it."""
-        pass
 
     @abstractmethod
     def audio_callback(self, indata, frames, time, status):
         """Callback function for processing audio data."""
-        pass
 
     @abstractmethod
     async def process_audio_chunk(self, audio_chunk):
         """Process a chunk of audio data."""
-        pass
 
     @abstractmethod
     async def transcribe_audio(self, audio_chunk):
         """Send audio data to the transcription service and yield the transcribed words."""
-        pass
 
     @abstractmethod
     def is_instruction(self, sentence):
         """Evaluate if the current sentence is a complete instruction."""
-        pass
 
     @abstractmethod
     async def process_agent(self, agent_url, instruction):
         """Send an instruction to an agent and yield the response."""
-        pass
 
     @abstractmethod
     async def stream_speech(self, agent_stream):
         """Stream the agent's response as speech."""
-        pass
 
     @abstractmethod
     async def stream_json(self, agent_stream):
         """Stream the agent's response as JSON."""
-        pass
 
     @abstractmethod
     def extract_chunk(self, chunk):
         """Extract the text chunk that is ready to be spoken."""
-        pass
 
     @abstractmethod
     def extract_json(self, chunk):
         """Extract and return JSON from the streamed data."""
-        pass
 
     @abstractmethod
     async def start(self):
         """Start the server and begin processing."""
-        pass
 
 
 
 class RealTimeTranscriptionServer(AbstractRealTimeTranscriptionServer):
-    def __init__(self, whisper_api_url, agent1_url, agent2_url, samplerate=16000, blocksize=1024):
+    def __init__(self, whisper_api_url, agent1_url, agent2_url, samplerate=16000, blocksize=1024) -> None:
         super().__init__(whisper_api_url, agent1_url, agent2_url, samplerate, blocksize)
         self.speech_engine = pyttsx3.init()
 
@@ -84,13 +71,13 @@ class RealTimeTranscriptionServer(AbstractRealTimeTranscriptionServer):
         return sentence.endswith(".")
 
 
-    async def stream_speech(self, agent_stream):
+    async def stream_speech(self, agent_stream) -> None:
         async for chunk in agent_stream:
             chunk_text = self.extract_chunk(chunk)
             self.speech_engine.say(chunk_text)
             self.speech_engine.runAndWait()
 
-    async def stream_json(self, agent_stream):
+    async def stream_json(self, agent_stream) -> None:
         async for chunk in agent_stream:
             json_content = self.extract_json(chunk)
             print(f"Received JSON content: {json_content}")
@@ -105,7 +92,7 @@ class RealTimeTranscriptionServer(AbstractRealTimeTranscriptionServer):
             print("Incomplete JSON chunk, waiting for more data.")
             return {}
 
-    async def start(self):
+    async def start(self) -> None:
         await self.handle_audio_stream()
 
 # Run the concrete server

@@ -5,7 +5,7 @@ import httpx
 from httpx_sse import connect_sse
 from openai import OpenAI
 
-from faster_whisper_server.config import Config, Task
+from faster_whisper_server.audio_config import Config, Task
 
 TRANSCRIPTION_ENDPOINT = "/v1/audio/transcriptions"
 TRANSLATION_ENDPOINT = "/v1/audio/translations"

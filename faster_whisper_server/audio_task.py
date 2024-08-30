@@ -1,24 +1,75 @@
 from collections.abc import Generator
+from multiprocessing.managers import BaseManager, BaseProxy
+import os
 from pathlib import Path
 from time import time
 import traceback
+from typing import Any, TypedDict, dataclass_transform
 
+import anyio
+from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
 import httpx
 from httpx_sse import connect_sse
 from lager import log
+from mbodied.agents.config import AgentConfig
 import numpy as np
-from pydantic_settings import BaseSettings
-from typing_extensions import TypedDict, override  # noqa
-from xtyping import Any, Dict, Iterable, Tuple
+from pydantic import BaseModel, Field, SecretStr
+from pydantic.json_schema import JsonSchemaValue
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from xtyping import Callable, Dict, Iterable, Tuple
 
 from faster_whisper_server.processing import audio_to_bytes
 
-WEBSOCKET_URI="http://localhost:7543/v1/audio/transcriptions"
-class State(TypedDict):
-    @override
-    def update(self, key: str, value: Any | None = None) -> "State":
-        self[key] = value
-        return self
+audio_state = {
+    "stream": "",
+    "model": "tts_models/multilingual/multi-dataset/xtts_v2",
+    "temperature": 0.0,
+}
+
+from threading import Lock
+lock = Lock()
+
+def get_audio_state():
+    with lock:
+        return audio_state.copy()
+
+def update_audio_state(new_state):
+    with lock:
+        audio_state.update(new_state)
+
+# class AgentConfig(BaseAgentConfig):
+#     model_config = SettingsConfigDict(cli_parse_args=True, env_file=os.getenv("ENV_FILE", ".env"))
+#     base_url: str = "https://api.mbodi.ai/v1"
+#     auth_token: str = "mbodi-demo-1"
+#     completion: CompletionConfig = Field(default_factory=CompletionConfig)
+#     guidance: Guidance = Field(default_factory=Guidance)
+#     sub_agents: list["AgentConfig"] | None = Field(default=None)
+#     state: State = Field(default_factory=State)
+
+
+WEBSOCKET_URI = "http://localhost:7543/v1/audio/transcriptions"
+
+
+
+
+
+def map_language(language: str) -> str:
+    if language == "en":
+        return "English"
+    if language == "ru":
+        return "Russian"
+    if language == "es":
+        return "Spanish"
+    if language == "fr":
+        return "French"
+    if language == "de":
+        return "German"
+    if language == "it":
+        return "Italian"
+    if language == "pt":
+        return "Portuguese"
+    return language
+
 
 class TaskConfig(BaseSettings):
     agent_base_url: str = "http://localhost:3389/v1"
@@ -33,7 +84,7 @@ class TaskConfig(BaseSettings):
     RATE: int = 16000
     PLACE_HOLDER: str = "Loading can take 30 seconds if a new model is selected..."
     TTS_MODEL: str = "tts_models/multilingual/multi-dataset/xtts_v2"
-    FIRST_SPEAKER: str = "Luis Moray"
+    FIRST_SPEAKER: str = "Aaron Dreschner"
     SECOND_SPEAKER: str = "Sofia Hellen"
     FIRST_LANGUAGE: str = "en"
     SECOND_LANGUAGE: str = "es"
@@ -43,10 +94,10 @@ class TaskConfig(BaseSettings):
 def stream_whisper(
     data: np.ndarray,
     sr: int,
-    endpoint: str,
     temperature: float,
     model: str,
     http_client: httpx.Client,
+    endpoint: str = WEBSOCKET_URI,
 ) -> Iterable[str]:
     """Stream audio data to the server and yield transcriptions."""
     kwargs = {
@@ -59,7 +110,7 @@ def stream_whisper(
         },
     }
     try:
-        with connect_sse(http_client, "POST", WEBSOCKET_URI, **kwargs) as event_source:
+        with connect_sse(http_client, "POST", endpoint, **kwargs) as event_source:
             for event in event_source.iter_sse():
                 yield event.data
     except Exception as e:
@@ -95,35 +146,39 @@ def handle_audio_file(
     return state, result, f"STT tok/sec: {tokens_per_sec:.4f}"
 
 
-def handle_audio_stream(
-    audio_source: Tuple[int, np.ndarray] | None,
-    audio_state: State,
-    temperature: float,
-    http_client: httpx.Client,
-) -> Generator[Tuple[Dict, str, str], None, None]:
-    """Handle audio data for transcription or translation tasks."""
-    print(f"audio state: {audio_state}")
-    endpoint = audio_state["endpoint"]
-    tic = time()
-    total_tokens = 0
+def normalize_audio(audio_source: tuple[int, np.ndarray]) -> np.ndarray:
     if not audio_source:
-        return audio_state, "", ""
+        return  "", ""
     sr, y = audio_source
     y = y.astype(np.float32)
     y = y.mean(axis=1) if y.ndim > 1 else y
     try:
         y /= np.max(np.abs(y)) if np.max(np.abs(y)) > 0 else 1
-    except Exception as e:
+        return sr, y
+    except Exception:
         log.exception("Error normalizing audio: %s", traceback.format_exc())
-        return audio_state, "", ""
+        return sr, ""
+
+
+def handle_audio_stream(
+    audio_source: Tuple[int, np.ndarray] | None,
+    temperature: float,
+    http_client: httpx.Client,
+    audio_state: Dict[str, Any],
+    audio_settings: TaskConfig,
+) -> Generator[Tuple[Dict, str, str], None, None]:
+    """Handle audio data for transcription or translation tasks."""
+    print(f"audio state: {audio_state}")
+
     stream = audio_state["stream"]
-    stream = np.concatenate([stream, y]) if stream is not None else y
     if len(stream) < 16000:
         audio_state["stream"] = stream
-        return  audio_state, "", ""
+        return audio_state, "", ""
+    sr, y = normalize_audio(audio_source)
     previous_transcription = ""
     model = audio_state["model"]
-    for transcription in stream_whisper(stream, sr, endpoint, temperature, model, http_client):
+    tic = time()
+    for transcription in stream_whisper(stream, sr, endpoint=audio_settings.TRANSCRIPTION_ENDPOINT, temperature=temperature, model=model, http_client=http_client):
         if previous_transcription.lower().strip().endswith(transcription.lower().strip()):
             print(f"Skipping repeated transcription: {transcription}")
             continue

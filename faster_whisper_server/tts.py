@@ -7,7 +7,7 @@ import numpy as np
 
 loaded = False
 # Preload models (you might want to call this separately if it takes too long)
-def preload_tts():
+def preload_tts() -> None:
     global loaded
     if not loaded:
         preload_models(text_use_gpu=True, fine_use_gpu=True, coarse_use_gpu=True, codec_use_gpu=True)
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     sample_rate, audio = generate_tts(text)
     # print(f"Generated audio with sample rate {sample_rate} Hz")
     # print(f"Audio array shape: {audio.shape}")
-    
+
     # To save the audio, you can use a library like scipy or soundfile
     # For example, using scipy:
     from scipy.io import wavfile

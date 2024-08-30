@@ -7,6 +7,8 @@ import time
 import traceback
 from typing import TYPE_CHECKING, Annotated, Literal
 
+from anyio import create_memory_object_stream, run
+from anyio.streams.text import TextReceiveStream, TextSendStream
 from fastapi import (
     FastAPI,
     Form,
@@ -19,6 +21,7 @@ from fastapi import (
     WebSocketDisconnect,
 )
 from fastapi.responses import StreamingResponse
+from fastapi.routing import APIWebSocketRoute
 from fastapi.websockets import WebSocketState
 from faster_whisper import WhisperModel
 from faster_whisper.vad import VadOptions, get_speech_timestamps
@@ -27,13 +30,8 @@ from pydantic import AfterValidator
 
 from faster_whisper_server.asr import FasterWhisperASR
 from faster_whisper_server.audio import AudioStream, audio_samples_from_file
-from faster_whisper_server.audio_config import (
-    SAMPLES_PER_SECOND,
-    Language,
-    ResponseFormat,
-    Task,
-    config,
-)
+from faster_whisper_server.audio_config import SAMPLES_PER_SECOND, Language, ResponseFormat, Task, config, q
+from faster_whisper_server.audio_task import handle_audio_stream
 from faster_whisper_server.core import Segment, segments_to_srt, segments_to_text, segments_to_vtt
 from faster_whisper_server.logger import logger
 from faster_whisper_server.server_models import (
@@ -51,6 +49,11 @@ if TYPE_CHECKING:
     from huggingface_hub.hf_api import ModelInfo
 
 loaded_models: OrderedDict[str, WhisperModel] = OrderedDict()
+
+def recieve_audio() -> None:
+    print("Receiving audio...")
+    handle_audio_stream()
+    print("Audio received")
 
 
 def load_model(model_name: str) -> WhisperModel:
@@ -77,14 +80,12 @@ def load_model(model_name: str) -> WhisperModel:
     return whisper
 
 
-app = FastAPI(root_path="/v1")
+app = FastAPI(root_path="/audio")
 
 
 @app.get("/health")
 def health() -> Response:
     return Response(status_code=200, content="OK")
-
-
 
 @app.post("/speech{model_name:path}")
 # NOTE: `examples` doesn't work https://github.com/tiangolo/fastapi/discussions/10537
@@ -126,33 +127,8 @@ def get_model(
     )
 
 
-def get_audio_models() -> ModelListResponse:
+def get_models() -> ModelListResponse:
     models = huggingface_hub.list_models(library="ctranslate2", tags="automatic-speech-recognition", cardData=True)
-    models = list(models)
-    models.sort(key=lambda model: model.downloads, reverse=True)
-    transformed_models: list[ModelObject] = []
-    for model in models:
-        assert model.created_at is not None
-        assert model.card_data is not None
-        assert model.card_data.language is None or isinstance(model.card_data.language, str | list)
-        if model.card_data.language is None:
-            language = []
-        elif isinstance(model.card_data.language, str):
-            language = [model.card_data.language]
-        else:
-            language = model.card_data.language
-        transformed_model = ModelObject(
-            id=model.id,
-            created=int(model.created_at.timestamp()),
-            object_="model",
-            owned_by=model.id.split("/")[0],
-            language=language,
-        )
-        transformed_models.append(transformed_model)
-    return ModelListResponse(data=transformed_models)
-
-def get_visual_models() -> ModelListResponse:
-    models = huggingface_hub.list_models(tags="image-text-to-text", cardData=True)
     models = list(models)
     models.sort(key=lambda model: model.downloads, reverse=True)
     transformed_models: list[ModelObject] = []
@@ -296,7 +272,6 @@ def translate_file(
     response_format: Annotated[ResponseFormat, Form()] = config.default_response_format,
     temperature: Annotated[float, Form()] = 0.0,
     stream: Annotated[bool, Form()] = False,
-    language: Annotated[Language | None, Form()] = config.default_language,
 ) -> Response | StreamingResponse:
     whisper = load_model(model)
     try:
@@ -306,7 +281,6 @@ def translate_file(
             initial_prompt=prompt,
             temperature=temperature,
             vad_filter=True,
-            language=language,
         )
         segments = Segment.from_faster_whisper_segments(segments)
 
@@ -451,5 +425,20 @@ if config.enable_ui:
 
     from faster_whisper_server.stt import create_gradio_demo
 
-    app = gr.mount_gradio_app(app, create_gradio_demo(config), path="/", show_error=False)
+    app = gr.mount_gradio_app(app, create_gradio_demo(config), path="/", show_error=False, root_path="/v1/audio")
+
+
+async def main():
+    bytes_send, bytes_receive = create_memory_object_stream[bytes](1)
+    text_send = TextSendStream(bytes_send)
+    await text_send.send("åäö")
+    result = await bytes_receive.receive()
+    print(repr(result))
+
+    text_receive = TextReceiveStream(bytes_receive)
+    await bytes_send.send(result)
+    result = await text_receive.receive()
+    print(repr(result))
+
+run(main)
 

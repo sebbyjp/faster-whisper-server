@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, BinaryIO
 import numpy as np
 import soundfile as sf
 
-from faster_whisper_server.audio_config import SAMPLES_PER_SECOND
+from faster_whisper_server.config import SAMPLES_PER_SECOND
 from faster_whisper_server.logger import logger
 
 if TYPE_CHECKING:
@@ -54,9 +54,9 @@ class Audio:
         return Audio(self.data[int(ts * SAMPLES_PER_SECOND) :], start=ts)
 
     def extend(self, data: NDArray[np.float32]) -> None:
-        # logger.debug(f"Extending audio by {len(data) / SAMPLES_PER_SECOND:.2f}s")
+        logger.debug(f"Extending audio by {len(data) / SAMPLES_PER_SECOND:.2f}s")
         self.data = np.append(self.data, data)
-        # logger.debug(f"Audio duration: {self.duration:.2f}s")
+        logger.debug(f"Audio duration: {self.duration:.2f}s")
 
 
 # TODO: trim data longer than x
@@ -87,15 +87,12 @@ class AudioStream(Audio):
         while True:
             await self.modify_event.wait()
             self.modify_event.clear()
-
-            if self.closed:
-                if self.duration > i:
-                    yield self.after(i).data
-                return
-            if self.duration - i >= min_duration:
+            if self.closed or self.duration - i >= min_duration:
                 # If `i` shouldn't be set to `duration` after the yield
                 # because by the time assignment would happen more data might have been added
                 i_ = i
                 i = self.duration
                 # NOTE: probably better to just to a slice
                 yield self.after(i_).data
+            if self.closed:
+                return

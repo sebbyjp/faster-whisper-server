@@ -1,13 +1,13 @@
-import gradio as gr
-import numpy as np
-from faststream import FastStream, Stream
+from io import BytesIO
 from multiprocessing import Manager
 from time import time
-from typing import Dict, Generator, Tuple
-from io import BytesIO
-import soundfile as sf
+
+from faststream import FastStream, Stream
+import gradio as gr
 import httpx
 from httpx_sse import connect_sse
+import numpy as np
+import soundfile as sf
 
 # Initialize FastStream app
 app = FastStream()
@@ -26,7 +26,7 @@ TRANSCRIPTION_ENDPOINT = "/transcribe"
 def audio_to_bytes(sr: int, data: np.ndarray) -> bytes:
 
     with BytesIO() as buf:
-        sf.write(buf, data, sr, format='WAV')
+        sf.write(buf, data, sr, format="WAV")
         return buf.getvalue()
 
 # Create a shared state using multiprocessing.Manager
@@ -55,10 +55,10 @@ async def streaming_audio_task(data: np.ndarray, sr: int, endpoint: str, tempera
             for event in event_source.iter_sse():
                 yield event.data
     except Exception as e:
-        yield f"Error streaming audio: {str(e)}"
+        yield f"Error streaming audio: {e!s}"
 
 @app.task
-async def handle_audio(audio_source, task, streaming, temperature, model):
+async def handle_audio(audio_source, task, streaming, temperature, model) -> None:
     stream = shared_state.get("stream", None)
     endpoint = TRANSLATION_ENDPOINT if task == "translate" else TRANSCRIPTION_ENDPOINT
 
@@ -68,22 +68,22 @@ async def handle_audio(audio_source, task, streaming, temperature, model):
     if streaming:
         if not audio_source:
             return
-        
+
         sr, y = audio_source
         y = y.astype(np.float32)
         y = y.mean(axis=1) if y.ndim > 1 else y
-        
+
         try:
             y /= np.max(np.abs(y))
         except Exception as e:
-            shared_state["transcription"] = f"Error normalizing audio: {str(e)}"
+            shared_state["transcription"] = f"Error normalizing audio: {e!s}"
             return
-        
+
         stream = np.concatenate([stream, y]) if stream is not None else y
         if len(stream) < 16000:
             shared_state["stream"] = stream
             return
-        
+
         previous_transcription = shared_state.get("transcription", "")
         async for transcription in streaming_audio_task(stream, sr, endpoint, temperature, model):
             if previous_transcription.lower().strip().endswith(transcription.lower().strip()):
@@ -98,8 +98,8 @@ async def handle_audio(audio_source, task, streaming, temperature, model):
         shared_state["stream"] = stream
 
 # Gradio Interface
-def create_interface():
-    with gr.Blocks() as demo:
+def create_interface() -> None:
+    with gr.Blocks():
         audio_input = gr.Audio(source="microphone", type="numpy", streaming=True)
         model_input = gr.Textbox(value="model-name", label="Model")
         task_input = gr.Radio(choices=["transcribe", "translate"], value="transcribe", label="Task")

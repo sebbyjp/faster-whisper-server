@@ -4,10 +4,12 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from faster_whisper_server.core import Segment, Transcription, Word, segments_to_text
+from faster_whisper_server import utils
 
 if TYPE_CHECKING:
-    from faster_whisper.transcribe import TranscriptionInfo
+    from faster_whisper.transcribe import Segment, TranscriptionInfo, Word
+
+    from faster_whisper_server.core import Transcription
 
 
 # https://platform.openai.com/docs/api-reference/audio/json-object
@@ -16,11 +18,55 @@ class TranscriptionJsonResponse(BaseModel):
 
     @classmethod
     def from_segments(cls, segments: list[Segment]) -> TranscriptionJsonResponse:
-        return cls(text=segments_to_text(segments))
+        return cls(text=utils.segments_text(segments))
 
     @classmethod
     def from_transcription(cls, transcription: Transcription) -> TranscriptionJsonResponse:
         return cls(text=transcription.text)
+
+
+class WordObject(BaseModel):
+    start: float
+    end: float
+    word: str
+    probability: float
+
+    @classmethod
+    def from_word(cls, word: Word) -> WordObject:
+        return cls(
+            start=word.start,
+            end=word.end,
+            word=word.word,
+            probability=word.probability,
+        )
+
+
+class SegmentObject(BaseModel):
+    id: int
+    seek: int
+    start: float
+    end: float
+    text: str
+    tokens: list[int]
+    temperature: float
+    avg_logprob: float
+    compression_ratio: float
+    no_speech_prob: float
+
+    @classmethod
+    def from_segment(cls, segment: Segment) -> SegmentObject:
+        return cls(
+            id=segment.id,
+            seek=segment.seek,
+            start=segment.start,
+            end=segment.end,
+            text=segment.text,
+            tokens=segment.tokens,
+            temperature=segment.temperature,
+            avg_logprob=segment.avg_logprob,
+            compression_ratio=segment.compression_ratio,
+            no_speech_prob=segment.no_speech_prob,
+        )
 
 
 # https://platform.openai.com/docs/api-reference/audio/verbose-json-object
@@ -29,8 +75,8 @@ class TranscriptionVerboseJsonResponse(BaseModel):
     language: str
     duration: float
     text: str
-    words: list[Word]
-    segments: list[Segment]
+    words: list[WordObject]
+    segments: list[SegmentObject]
 
     @classmethod
     def from_segment(cls, segment: Segment, transcription_info: TranscriptionInfo) -> TranscriptionVerboseJsonResponse:
@@ -38,8 +84,8 @@ class TranscriptionVerboseJsonResponse(BaseModel):
             language=transcription_info.language,
             duration=segment.end - segment.start,
             text=segment.text,
-            words=(segment.words if isinstance(segment.words, list) else []),
-            segments=[segment],
+            words=([WordObject.from_word(word) for word in segment.words] if isinstance(segment.words, list) else []),
+            segments=[SegmentObject.from_segment(segment)],
         )
 
     @classmethod
@@ -49,19 +95,27 @@ class TranscriptionVerboseJsonResponse(BaseModel):
         return cls(
             language=transcription_info.language,
             duration=transcription_info.duration,
-            text=segments_to_text(segments),
-            segments=segments,
-            words=Word.from_segments(segments),
+            text=utils.segments_text(segments),
+            segments=[SegmentObject.from_segment(segment) for segment in segments],
+            words=[WordObject.from_word(word) for word in utils.words_from_segments(segments)],
         )
 
     @classmethod
-    def from_transcription(cls, transcription: Transcription, ) -> TranscriptionVerboseJsonResponse:
+    def from_transcription(cls, transcription: Transcription) -> TranscriptionVerboseJsonResponse:
         return cls(
             language="english",  # FIX: hardcoded
             duration=transcription.duration,
             text=transcription.text,
-            words=transcription.words,
-            segments=transcription.segments,
+            words=[
+                WordObject(
+                    start=word.start,
+                    end=word.end,
+                    word=word.text,
+                    probability=word.probability,
+                )
+                for word in transcription.words
+            ],
+            segments=[],  # FIX: hardcoded
         )
 
 

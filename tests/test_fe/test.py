@@ -1,6 +1,8 @@
+import json
 import logging
-import os
+from pprint import pprint
 import time
+
 from mbodied.agents import LanguageAgent
 from openai import OpenAI
 import pytest
@@ -16,14 +18,14 @@ Determine if the following is an instruction or direct question. Answer yes if i
 NOT_A_COMPLETE_INSTRUCTION = "Not a complete instruction."
 
 
-@pytest.fixture()
+@pytest.fixture
 def query() -> str:
     return "Tell me about the weather in New York. Now."
 
 
 def test_determine_instruction(query) -> None:
     weak_agent = LanguageAgent(
-        model_src="openai", api_key="mbodi-demo-1", 
+        model_src="openai", api_key="mbodi-demo-1",
         model_kwargs={"base_url": "https://api.mbodi.ai/v1"},
         context=SYSTEM_PROMPT
     )
@@ -45,8 +47,6 @@ def byte_stream_generator(response):
 
 
 def stream_tts(text_chunks, openai_api: OpenAI, out_file="out.wav") -> None:
-
-
     start_time = time.time()
     with open(out_file, "wb") as out:
       for text in text_chunks:
@@ -76,7 +76,31 @@ def test_speech(query) -> None:
     stream_tts(text_chunks, openai_api)
 
 
+def test_guided_json():
+    weak_agent = LanguageAgent(
+        model_src="openai", api_key="mbodi-demo-1",
+        model_kwargs={"base_url": "https://api.mbodi.ai/v1",
+                        "response_format": {
+                            "type": "json_object",
+                        },
+
+        },
+        context="You are a brand new assistant... that responds with a json schema.",
+    )
+
+    from mbodied.types.motion.control import MobileSingleArmControl
+    # from mbodied.types.motion.control import HandControl
+
+    # response = weak_agent.act("Look up and move hand left." + query, model="astroworld",
+    #                             extra_body={"guided_json": MobileSingleArmControl().schema()})
+
+    # print(response)
+    pprint(MobileSingleArmControl().schema(include_descriptions=True))
+    # assert json.loads(response) is not None, f"Expected a json object with a key, got {response}"
+    # pprint(f"Test passed. Response: {response}")
+
 if __name__ == "__main__":
     query = "Tell me about the weather in New York. What is the weather like in New York?"
-    test_determine_instruction(query)
-    test_act_and_stream()
+    # test_determine_instruction(query)
+    test_guided_json()
+    # test_act_and_stream()

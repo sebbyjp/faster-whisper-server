@@ -1,8 +1,9 @@
 import asyncio
+from collections.abc import AsyncGenerator
+from functools import partial
 import logging
 from time import time
-from typing import AsyncGenerator, Literal, Tuple, Optional
-from functools import partial
+from typing import Literal
 
 import gradio as gr
 import httpx
@@ -21,7 +22,7 @@ NOT_A_COMPLETE_INSTRUCTION = "Not a complete instruction..."
 DETERMINE_INSTRUCTION_PROMPT = "Determine if the following is a complete instruction:"
 
 # Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Type aliases
@@ -43,7 +44,7 @@ weak_agent = LanguageAgent(model_src="openai", api_key="mbodi-demo-1", model_kwa
 agent = LanguageAgent(model_src="openai", api_key="mbodi-demo-1", model_kwargs={"base_url": "http://localhost:3389/v1"},
     context=SYSTEM_PROMPT)
 
-async def predict_instruction(text: Optional[str], mode: PredInstrMode, last_instruction: str) -> AsyncGenerator[Tuple[str, PredInstrMode], None]:
+async def predict_instruction(text: str | None, mode: PredInstrMode, last_instruction: str) -> AsyncGenerator[tuple[str, PredInstrMode], None]:
     if mode == "clear" or not text or not text.strip():
         yield "", "wait"
         return
@@ -71,7 +72,7 @@ async def predict_instruction(text: Optional[str], mode: PredInstrMode, last_ins
         yprint(await weak_agent.act(instruction="Why wasn't it a complete instruction?", model="astroworld"))
         yield NOT_A_COMPLETE_INSTRUCTION, "predict"
 
-async def act(instruction: Optional[str], last_response: Optional[str], last_tps: str, mode: ActMode) -> AsyncGenerator[Tuple[str, str, ActMode], None]:
+async def act(instruction: str | None, last_response: str | None, last_tps: str, mode: ActMode) -> AsyncGenerator[tuple[str, str, ActMode], None]:
     aprint(f"Instruction: {instruction}, last response: {last_response}, mode: {mode}")
 
     if mode == "clear" or not instruction or not instruction.strip():
@@ -106,7 +107,7 @@ async def act(instruction: Optional[str], last_response: Optional[str], last_tps
             return
         yield response, f"TPS: {tokens_per_sec:.4f}", "acting"
 
-async def speak(text: Optional[str], mode: SpeakMode) -> AsyncGenerator[Tuple[bytes, str, SpeakMode], None]:
+async def speak(text: str | None, mode: SpeakMode) -> AsyncGenerator[tuple[bytes, str, SpeakMode], None]:
     console.print(f"SPEAK Text: {text}, Mode Speak: {mode}")
     if not text or len(text.split()) < 3:
         yield b"", "", "wait"
@@ -128,7 +129,7 @@ async def speak(text: Optional[str], mode: SpeakMode) -> AsyncGenerator[Tuple[by
             yield b"", "", "clear"
     print("Done speaking.")
 
-def transition(instruction: Optional[str], response: Optional[str], instruction_mode: PredInstrMode, act_mode: ActMode, speech_mode: SpeakMode) -> Tuple[PredInstrMode, ActMode, SpeakMode]:
+def transition(instruction: str | None, response: str | None, instruction_mode: PredInstrMode, act_mode: ActMode, speech_mode: SpeakMode) -> tuple[PredInstrMode, ActMode, SpeakMode]:
     if speech_mode == "clear":
         return "clear", "clear", "clear"
 
@@ -150,21 +151,21 @@ def transition(instruction: Optional[str], response: Optional[str], instruction_
     return instruction_mode, act_mode, speech_mode
 
 class State:
-    def __init__(self):
-        self.instruction: Optional[str] = ""
-        self.response: Optional[str] = ""
-        self.transcription: Optional[str] = ""
+    def __init__(self) -> None:
+        self.instruction: str | None = ""
+        self.response: str | None = ""
+        self.transcription: str | None = ""
         self.pred_instr_mode: PredInstrMode = "predict"
         self.act_mode: ActMode = "wait"
         self.speak_mode: SpeakMode = "wait"
 
-async def process_state(state: State) -> Tuple[Optional[str], Optional[str], str, PredInstrMode, ActMode, SpeakMode, bytes, str]:
+async def process_state(state: State) -> tuple[str | None, str | None, str, PredInstrMode, ActMode, SpeakMode, bytes, str]:
     new_instruction, new_pred_mode = "", state.pred_instr_mode
     async for instr, mode in predict_instruction(state.transcription, state.pred_instr_mode, state.instruction):
         new_instruction, new_pred_mode = instr, mode
-    
+
     new_pred_mode, new_act_mode, new_speak_mode = transition(new_instruction, state.response, new_pred_mode, state.act_mode, state.speak_mode)
-    
+
     new_response, new_tps = state.response, ""
     audio_chunk, spoken_text = b"", ""
 
@@ -180,18 +181,18 @@ async def process_state(state: State) -> Tuple[Optional[str], Optional[str], str
 
 def create_gradio_demo(config: Config) -> gr.Blocks:
     base_url = "https://api.mbodi.ai/audio/v1"
-    http_client = httpx.Client(base_url=base_url, timeout=TIMEOUT)
-    openai_client = AsyncOpenAI(base_url=f"{base_url}", api_key="cant-be-empty")
+    httpx.Client(base_url=base_url, timeout=TIMEOUT)
+    AsyncOpenAI(base_url=f"{base_url}", api_key="cant-be-empty")
     state = State()
 
     async def handler(
-        audio_source: Optional[Tuple[int, np.ndarray]],
+        audio_source: tuple[int, np.ndarray] | None,
         model: str,
         task: Task,
         temperature: float,
         streaming: bool,
         stream: np.ndarray
-    ) -> Tuple[np.ndarray, str, str, bool]:
+    ) -> tuple[np.ndarray, str, str, bool]:
         endpoint = TRANSLATION_ENDPOINT if task == Task.TRANSLATE else TRANSCRIPTION_ENDPOINT
 
         if not audio_source:
@@ -203,7 +204,7 @@ def create_gradio_demo(config: Config) -> gr.Blocks:
         try:
             y /= np.max(np.abs(y))
         except Exception as e:
-            logger.exception(f"Error normalizing audio: {str(e)}")
+            logger.exception(f"Error normalizing audio: {e!s}")
             return np.array([]), "", "Error normalizing audio.", True
 
         stream = np.concatenate([stream, y]) if stream is not None else y
@@ -250,11 +251,11 @@ def create_gradio_demo(config: Config) -> gr.Blocks:
         instruction = gr.Textbox(label="Instruction", placeholder=PLACE_HOLDER)
         response = gr.Textbox(label="Response", placeholder=PLACE_HOLDER)
         response_tps = gr.Textbox(label="Response TPS", placeholder=PLACE_HOLDER)
-        
+
         pred_instr_mode = gr.Textbox(label="Predict Instruction Mode", value="predict")
         act_mode = gr.Textbox(label="Act Mode", value="wait")
         speak_mode = gr.Textbox(label="Speak Mode", value="wait")
-        
+
         spoken_text = gr.Textbox(label="Spoken Text", placeholder=PLACE_HOLDER)
 
         model_dropdown = gr.Dropdown(choices=[config.whisper.model], label="Model", value=config.whisper.model)

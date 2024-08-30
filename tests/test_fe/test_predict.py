@@ -1,6 +1,8 @@
-import pytest
 import asyncio
-from typing import Literal, AsyncGenerator, Tuple
+from collections.abc import AsyncGenerator
+from typing import Literal
+
+import pytest
 
 PredInstrMode = Literal["predict", "repeat", "clear", "wait"]
 NOT_A_COMPLETE_INSTRUCTION = "Not a complete instruction..."
@@ -8,19 +10,19 @@ DETERMINE_INSTRUCTION_PROMPT = "Determine if the following is a complete instruc
 
 # Mock LanguageAgent for testing purposes
 class MockLanguageAgent:
-    async def act(self, instruction, model, extra_body):
+    async def act(self, instruction, model, extra_body) -> str:
         # Simulate the agent's behavior
         if "complete" in instruction.lower():
             return "Yes"
         return "No"
 
-    def forget(self, everything):
+    def forget(self, everything) -> None:
         pass
 
 weak_agent = MockLanguageAgent()
 
-@pytest.mark.asyncio()
-async def predict_instruction(text: str, mode: PredInstrMode, last_instruction: str) -> AsyncGenerator[Tuple[str, PredInstrMode], None]:
+@pytest.mark.asyncio
+async def predict_instruction(text: str, mode: PredInstrMode, last_instruction: str) -> AsyncGenerator[tuple[str, PredInstrMode], None]:
     if mode == "clear" or not text or not text.strip():
         yield "", "wait"
         return
@@ -47,8 +49,8 @@ async def predict_instruction(text: str, mode: PredInstrMode, last_instruction: 
         print(await weak_agent.act(instruction="Why wasn't it a complete instruction?", model="astroworld"))
         yield NOT_A_COMPLETE_INSTRUCTION, "predict"
 
-@pytest.mark.asyncio()
-async def test_predict_instruction():
+@pytest.mark.asyncio
+async def test_predict_instruction() -> None:
     # Test case 1: Empty input
     result = [r async for r in predict_instruction("", "predict", "")]
     assert result == [("", "wait")], f"Expected [('', 'wait')], got {result}"
