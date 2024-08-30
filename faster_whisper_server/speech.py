@@ -143,7 +143,7 @@ if gr.NO_RELOAD:
     settings = get_speech_settings()
     model = settings["tts_model"]
     gpu = settings["gpu"]
-    tts = TTS(model, gpu)
+    tts = TTS(model_name=model, gpu=gpu)
 
 def speak(text: str, state: Dict, speaker: str, language: str, second_speaker: str=SPEAKERS[0], second_language: str="ru") -> Iterator[Tuple[Tuple[int, np.ndarray], Dict]]:
     """Generate and stream TTS audio using Coqui TTS with diarization."""

@@ -85,7 +85,6 @@ if gr.NO_RELOAD:
             prompt= lambda q: f"{DETERMINE_INSTRUCTION_PROMPT}{q}",
         )
     )
-    tts = TTS(task.TTS_MODEL, gpu=True)
 
     # Initialize models
 
@@ -471,5 +470,5 @@ if __name__ == "__main__":
 
     log.add(RichHandler(), level="DEBUG")
     demo.queue().launch(
-        server_name="0.0.0.0", share=False, show_error=True, debug=True, root_path="/instruct", server_port=7861
+        server_name="0.0.0.0", share=False, show_error=True, debug=True, root_path="/instruct", server_port=7862
     )
