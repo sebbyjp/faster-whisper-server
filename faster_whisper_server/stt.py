@@ -470,5 +470,10 @@ if __name__ == "__main__":
 
     log.add(RichHandler(), level="DEBUG")
     demo.queue().launch(
-        server_name="0.0.0.0", share=False, show_error=True, debug=True, root_path="/instruct", server_port=7861
+        server_name="0.0.0.0",
+        share=False,
+        show_error=True,
+        debug=True,
+        root_path="/instruct",
+        server_port=range(7861, 7871)  # Try ports 7861 to 7870
     )
