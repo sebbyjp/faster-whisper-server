@@ -389,8 +389,8 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
                 outputs=[agent_state, transcription, instruction, response],
             )
             transcription.change(
-                weak_agent.act,
-                inputs=[transcription, instruction, agent_state, first_speaker_language, second_speaker_language],
+                lambda transcription, instruction, agent_state: weak_agent.act(transcription, instruction, agent_state),
+                inputs=[transcription, instruction, agent_state],
                 outputs=[response, agent_state],
             ).then(
                 process_state,
