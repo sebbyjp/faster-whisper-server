@@ -371,8 +371,7 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
                     http_client,
                 ):
                     update_audio_state(state)
-                    current_state = get_audio_state()
-                    yield current_state, transcription, transcription_tps
+                    yield state, transcription, transcription_tps
 
             audio.stream(
                 fn=stream_audio,

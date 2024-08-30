@@ -156,14 +156,11 @@ def speak(text: str, state: Dict, speaker: str, language: str, second_speaker: s
     print(f"Input text: {text}")
     print(f"Initial mode: {mode}")
 
-    if not text or (len(text.split()) < 3 and not text.endswith((".", "?", "!"))) or mode in ("clear", "wait"):
+    if not text or mode in ("clear", "wait"):
         state["speak_mode"] = "wait"
-        print("Text too short or mode is clear/wait. Yielding empty array.")
+        print("Text empty or mode is clear/wait. Yielding empty array.")
         yield (sr, np.array([], dtype=np.int16)), state
         return
-
-    # Ensure we have the latest state
-    state = get_state()
 
     # Detect language and choose speaker
     detected_language = detect(text)
@@ -178,14 +175,8 @@ def speak(text: str, state: Dict, speaker: str, language: str, second_speaker: s
     audio_array = (audio_array * 32767).astype(np.int16)
     print(f"Full audio shape: {audio_array.shape}, dtype: {audio_array.dtype}")
 
-    # Save full audio
-    sf.write("full_audio.wav", audio_array, sr)
-    print("Saved full audio to full_audio.wav")
-
     chunk_size = int(sr * 0.5)  # 0.5 second chunks
     print(f"Chunk size: {chunk_size}")
-
-    full_output = np.array([], dtype=np.int16)
 
     for i in range(0, len(audio_array), chunk_size):
         state = get_state()
@@ -198,11 +189,6 @@ def speak(text: str, state: Dict, speaker: str, language: str, second_speaker: s
         print(f"Processing chunk {i//chunk_size + 1}, shape: {chunk.shape}")
 
         if len(chunk) > 0:
-            # Update audio state
-            current_audio = get_audio_state().get("audio_array", np.array([], dtype=np.int16))
-            updated_audio = np.concatenate([current_audio, chunk])
-            update_audio_state({"audio_array": updated_audio})
-            
             # Update state
             state["speak_mode"] = "speaking"
             state["spoken"] = text[:int(len(text) * ((i + chunk_size) / len(audio_array)))]
@@ -210,11 +196,6 @@ def speak(text: str, state: Dict, speaker: str, language: str, second_speaker: s
             
             print(f"Updated state: {state}")
             
-            # Save intermediate chunk
-            sf.write("intermediate_chunk.wav", chunk, sr)
-            print(f"Saved intermediate chunk {i//chunk_size + 1} to intermediate_chunk.wav")
-
-            full_output = np.concatenate([full_output, chunk])
             yield (sr, chunk), state
 
     state = get_state()
@@ -223,10 +204,6 @@ def speak(text: str, state: Dict, speaker: str, language: str, second_speaker: s
     update_state(state)
     print(f"Final state: {state}")
     print("Done speaking.")
-
-    # Save entire yielded audio
-    sf.write("full_output.wav", full_output, sr)
-    print("Saved entire yielded audio to full_output.wav")
 
     yield (sr, np.array([], dtype=np.int16)), state
 
