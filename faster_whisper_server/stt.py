@@ -354,6 +354,7 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
                     "speak_mode": "wait",
                     "transcription": "",
                     "instruction": "",
+                    "uncommitted": "",
                 }
             )
 
@@ -364,11 +365,13 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
             ) -> Iterator[tuple[dict, str, str]]:
                 audio_state = get_audio_state()
                 audio_state["model"] = model
+                audio_settings = get_speech_settings()
                 for state, transcription, transcription_tps in handle_audio_stream(
                     audio,
                     audio_state,
                     0.0,
                     http_client,
+                    audio_settings,
                 ):
                     update_audio_state(state)
                     yield state, transcription, transcription_tps
@@ -383,7 +386,7 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
                 outputs=[audio_state, transcription, transcription_tps],
             ).then(
                 process_state,
-                inputs=[transcription, instruction, response_raw, agent_state],
+                inputs=[transcription, instruction, response_raw, agent_state, first_speaker_language, second_speaker_language],
                 outputs=[agent_state, transcription, instruction, response],
             )
             transcription.change(
