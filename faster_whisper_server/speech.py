@@ -156,7 +156,7 @@ def speak(text: str, state: Dict, speaker: str, language: str, second_speaker: s
     print(f"Input text: {text}")
     print(f"Initial mode: {mode}")
 
-    if text and len(text.split()) < 3 and not (text.endswith((".", "?", "!"))) or mode in ("clear", "wait"):
+    if not text or len(text.split()) < 3 and not (text.endswith((".", "?", "!"))) or mode in ("clear", "wait"):
         state["speak_mode"] = "wait"
         print("Text too short or mode is clear/wait. Yielding empty array.")
         yield (sr, np.array([], dtype=np.int16)), state
@@ -185,6 +185,7 @@ def speak(text: str, state: Dict, speaker: str, language: str, second_speaker: s
     full_output = np.array([], dtype=np.int16)
 
     for i in range(0, len(audio_array), chunk_size):
+        state = get_state()
         if state["speak_mode"] == "clear":
             print("Speak mode cleared. Stopping.")
             yield (sr, np.array([], dtype=np.int16)), state
@@ -213,15 +214,16 @@ def speak(text: str, state: Dict, speaker: str, language: str, second_speaker: s
             full_output = np.concatenate([full_output, chunk])
             yield (sr, chunk), state
 
-        state["speak_mode"] = "finished"
-        state["spoken"] = text
-        update_state(state)
-        print(f"Final state: {state}")
-        print("Done speaking.")
+    state = get_state()
+    state["speak_mode"] = "finished"
+    state["spoken"] = text
+    update_state(state)
+    print(f"Final state: {state}")
+    print("Done speaking.")
 
-        # Save entire yielded audio
-        sf.write("full_output.wav", full_output, sr)
-        print("Saved entire yielded audio to full_output.wav")
+    # Save entire yielded audio
+    sf.write("full_output.wav", full_output, sr)
+    print("Saved entire yielded audio to full_output.wav")
 
     yield (sr, np.array([], dtype=np.int16)), state
 
