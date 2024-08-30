@@ -162,6 +162,9 @@ def speak(text: str, state: Dict, speaker: str, language: str, second_speaker: s
         yield (sr, np.array([], dtype=np.int16)), state
         return
 
+    # Ensure we have the latest state
+    state = get_state()
+
     # Detect language and choose speaker
     detected_language = detect(text)
     current_speaker = second_speaker if detected_language == second_language else speaker
