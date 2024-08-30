@@ -152,6 +152,8 @@ def speak(text: str, state: Dict, speaker: str, language: str, second_speaker: s
     text = state["response"]
     mode = state["speak_mode"]
     sr = tts.synthesizer.output_sample_rate
+    chunk_duration = 0.25
+    chunk_size = int(sr * chunk_duration)
 
     print(f"Input text: {text}")
     print(f"Initial mode: {mode}")
@@ -162,48 +164,57 @@ def speak(text: str, state: Dict, speaker: str, language: str, second_speaker: s
         yield (sr, np.array([], dtype=np.int16)), state
         return
 
-    # Detect language and choose speaker
-    detected_language = detect(text)
-    current_speaker = second_speaker if detected_language == second_language else speaker
-    print(f"Detected language: {detected_language}, Selected speaker: {current_speaker}")
+    sentences = [sentence.strip() for sentence in re.split(r"([.?!])", text) if sentence.strip()]
+    sentences = ["".join(sentences[i : i + 2]) for i in range(0, len(sentences), 2)]
+    sentences = [*sentences, ""]
+    spoken = state.get("spoken", "")
 
-    # Generate full audio
-    print("Generating full audio...")
-    audio_array = np.array(tts.tts(text, speaker=current_speaker, language=detected_language, split_sentences=True))
-    
-    # Convert to int16 and scale
-    audio_array = (audio_array * 32767).astype(np.int16)
-    print(f"Full audio shape: {audio_array.shape}, dtype: {audio_array.dtype}")
-
-    chunk_size = int(sr * 0.5)  # 0.5 second chunks
-    print(f"Chunk size: {chunk_size}")
-
-    for i in range(0, len(audio_array), chunk_size):
+    for sentence in sentences:
         state = get_state()
-        if state["speak_mode"] == "clear":
-            print("Speak mode cleared. Stopping.")
-            yield (sr, np.array([], dtype=np.int16)), state
+        if (
+            sentence
+            and not (spoken.strip() and sentence.startswith(spoken.strip()))
+            and state["speak_mode"] != "clear"
+        ):
+            detected_language = detect(sentence)
+            current_speaker = second_speaker if detected_language == second_language else speaker
+            print(f"Detected language: {detected_language}, Selected speaker: {current_speaker}")
+
+            audio_buffer = np.array(tts.tts(sentence, speaker=current_speaker, language=detected_language, split_sentences=False))
+            audio_buffer = (audio_buffer * 32767).astype(np.int16)
+            spoken += sentence
+            update_state({"spoken": spoken})
+
+            # Save audio for debugging
+            sf.write("output.wav", audio_buffer, sr)
+            print(f"Speaking: {sentence}", style="bold white on blue")
+
+            state = get_state()
+            print(f"STATE: {state}", style="bold white on blue")
+
+            # Concatenate and yield audio chunks
+            audio_out = get_speech_state().get("audio_array", np.array([], dtype=np.int16))
+            audio_out = np.concatenate([audio_out, audio_buffer])
+            update_speech_state({"audio_array": audio_out})
+
+            for i in range(0, len(audio_buffer), chunk_size):
+                if state["speak_mode"] == "clear":
+                    return
+                chunk = audio_buffer[i : i + chunk_size]
+                yield (sr, chunk), state
+
+            update_speech_state({"audio_array": audio_out})
+
+        elif state["speak_mode"] == "clear":
             return
-
-        chunk = audio_array[i:i+chunk_size]
-        print(f"Processing chunk {i//chunk_size + 1}, shape: {chunk.shape}")
-
-        if len(chunk) > 0:
-            # Update state
-            state["speak_mode"] = "speaking"
-            state["spoken"] = text[:int(len(text) * ((i + chunk_size) / len(audio_array)))]
-            update_state(state)
-            
-            print(f"Updated state: {state}")
-            
-            yield (sr, chunk), state
+        else:
+            continue
 
     state = get_state()
-    state["speak_mode"] = "finished"
-    state["spoken"] = text
-    update_state(state)
-    print(f"Final state: {state}")
-    print("Done speaking.")
+    if not state.get("uncommitted", "") or state.get("spoken", "").endswith(state.get("uncommitted", "")):
+        state["speak_mode"] = "finished"
+        update_state({"speak_mode": "finished", "uncommitted": "", "spoken": ""})
+        print("Done speaking.", style="bold white on blue")
 
     yield (sr, np.array([], dtype=np.int16)), state
 
