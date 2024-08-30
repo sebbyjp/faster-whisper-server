@@ -101,8 +101,8 @@ if gr.NO_RELOAD:
     )
     weak_agent = LanguageAgent(
         api_key=prelude_config.auth_token, 
-        # model_kwargs={"base_url": task.agent_base_url},
-        context=SYSTEM_PROMPT
+        model_kwargs={"base_url": task.agent_base_url},
+        context=SYSTEM_PROMPT,
     )
 
 
@@ -125,6 +125,37 @@ PredInstrMode = Literal["predict", "repeat", "clear", "wait"]
 ActMode = Literal["acting", "repeat", "clear", "wait"]
 SpeakMode = Literal["speaking", "wait", "clear"]
 
+
+def predict_instruction(
+    transcription: str, instruction: str, state: Dict | str
+) -> Tuple[str, Dict | str]:
+    
+    state = get_state()
+    if state["pred_instr_mode"] == "clear":
+        return "", get_state()
+
+    if state["pred_instr_mode"] == "repeat":
+        return state["instruction"], get_state()
+
+    if not transcription:
+        update_state({"pred_instr_mode": "wait"})
+        return "", get_state()
+
+    if len(weak_agent.history()) > 10:
+        weak_agent.forget_after(2)
+
+    tic = time()
+    total_tokens = 0
+    response = ""
+    response = weak_agent.act(prelude_config.completion.prompt(transcription), model="astroworld")
+    update_state({"pred_instr_mode": "predict"})
+    if response == "Yes":
+        update_state({"instruction": transcription})
+        return transcription, get_state()
+    else:
+        update_state({"instruction": ""})
+        return "", get_state()
+    return response, get_state()
 
 
 def act(instruction: str, last_response: str, last_tps: str, state: Dict | str) -> Iterator[Tuple[str, Dict]]:  # noqa: UP006
@@ -389,7 +420,7 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
                 outputs=[agent_state, transcription, instruction, response],
             )
             transcription.change(
-                lambda transcription, instruction, agent_state: weak_agent.act(transcription, instruction, agent_state),
+                fn=predict_instruction,
                 inputs=[transcription, instruction, agent_state],
                 outputs=[response, agent_state],
             ).then(

@@ -1,7 +1,16 @@
 from threading import Lock
-
+from lager import log
 lock = Lock()
-state = {}
+state = {
+    "pred_instr_mode": "predict",
+    "transcription": "",
+    "instruction": "",
+    "response": "",
+    "spoken": "",
+    "uncommitted": "",
+    "speak_mode": "wait",
+    "act_mode": "wait",
+}
 
 def get_state():
     with lock:
@@ -12,48 +21,34 @@ def update_state(new_state):
         state.update(new_state)
 
 
-def process_state(raw_transcription: str, new_instruction: str,old_instruction: str,  raw_response: str, spoken: str, speaking: bool) -> dict:
-    state = get_state()
-    print(
-        f"PROCESS: Current state: {state}, new transcription: {raw_transcription}, new instruction: {new_instruction}, raw response: {raw_response}"
-        f"uncommitted: {state.get('uncommitted', '')}"
-    )
-    spoken = state.get("spoken", "")
-    uncommitted = state["uncommitted"]
-    new_instruction = state["instruction"]
-    # response = state["response"]
-    # If any mode is "clear", reset all modes
-    if any(state.get(mode) == "clear" for mode in ["pred_instr_mode", "act_mode", "speak_mode"]):
-        update_state(
-            {
-                "pred_instr_mode": "predict",
-                "act_mode": "wait",
-                "speak_mode": "wait",
-                "transcription": "",
-                "instruction": "",
-                "uncommitted": "",
-            }
-        )
-        return (
-            {
-                "pred_instr_mode": "predict",
-                "act_mode": "wait",
-                "speak_mode": "wait",
-                "transcription": "",
-                "instruction": "",
-                "spoken": "",
-                "uncommitted": "",
-            },
-            "",
-            "",
-            "",
-        )
-    spoken = state.get("spoken", "")
-    uncommitted = state.get("uncommitted", "")
-    return state, state["transcription"], state["instruction"], state["response"]
+def process_state(state: dict, raw_transcription: str, new_instruction: str, raw_response) -> dict:
+    log.info(f"PROCESS: Current state: {state}, new transcription: {raw_transcription}, new instruction: {new_instruction}, raw response: {raw_response}")
+    update_state({
+        "pred_instr_mode": "predict",
+        "transcription": raw_transcription,
+        "instruction": new_instruction,
+        "response": raw_response,
+        "spoken": "",
+    })
+    return state, raw_transcription, new_instruction, raw_response
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     # overlap_spoken_uncommitted = spoken and uncommitted and find_overlap(spoken, uncommitted)
     # if overlap_spoken_uncoemmitted:
     #     console.print(f"Overlap: spoken uncommitted {overlap_spoken_uncommitted}", style="bold magenta on yellow")

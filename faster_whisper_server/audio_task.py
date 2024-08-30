@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from time import time
 import traceback
-from typing import Any, TypedDict, dataclass_transform
+from typing import Any
 
 import anyio
 from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
@@ -26,6 +26,26 @@ audio_state = {
     "temperature": 0.0,
 }
 
+class TaskConfig(BaseSettings):
+    agent_base_url: str = "http://localhost:3389/v1"
+    agent_token: str = "mbodi-demo-1"
+    timeout: int = 10
+    TRANSCRIPTION_ENDPOINT: str = "/audio/transcriptions"
+    TRANSLATION_ENDPOINT: str = "/audio/translations"
+    TIMEOUT_SECONDS: int = 180
+    WEBSOCKET_URI: str = "wss://api.mbodi.ai/audio/v1/transcriptions"
+    CHUNK: int = 1024
+    CHANNELS: int = 1
+    RATE: int = 16000
+    PLACE_HOLDER: str = "Loading can take 30 seconds if a new model is selected..."
+    TTS_MODEL: str = "tts_models/multilingual/multi-dataset/xtts_v2"
+    FIRST_SPEAKER: str = "Aaron Dreschner"
+    SECOND_SPEAKER: str = "Sofia Hellen"
+    FIRST_LANGUAGE: str = "en"
+    SECOND_LANGUAGE: str = "es"
+    GPU: str = "cuda:6"
+
+
 from threading import Lock
 lock = Lock()
 
@@ -37,6 +57,14 @@ def update_audio_state(new_state):
     with lock:
         audio_state.update(new_state)
 
+audio_settings = TaskConfig()
+settings_lock = Lock()
+def get_audio_settings():
+    with settings_lock:
+        return audio_settings.copy()
+def update_audio_settings(new_settings):
+    with settings_lock:
+        audio_settings.update(new_settings)
 # class AgentConfig(BaseAgentConfig):
 #     model_config = SettingsConfigDict(cli_parse_args=True, env_file=os.getenv("ENV_FILE", ".env"))
 #     base_url: str = "https://api.mbodi.ai/v1"
@@ -71,24 +99,6 @@ def map_language(language: str) -> str:
     return language
 
 
-class TaskConfig(BaseSettings):
-    agent_base_url: str = "http://localhost:3389/v1"
-    agent_token: str = "mbodi-demo-1"
-    timeout: int = 10
-    TRANSCRIPTION_ENDPOINT: str = "/audio/transcriptions"
-    TRANSLATION_ENDPOINT: str = "/audio/translations"
-    TIMEOUT_SECONDS: int = 180
-    WEBSOCKET_URI: str = "wss://api.mbodi.ai/audio/v1/transcriptions"
-    CHUNK: int = 1024
-    CHANNELS: int = 1
-    RATE: int = 16000
-    PLACE_HOLDER: str = "Loading can take 30 seconds if a new model is selected..."
-    TTS_MODEL: str = "tts_models/multilingual/multi-dataset/xtts_v2"
-    FIRST_SPEAKER: str = "Aaron Dreschner"
-    SECOND_SPEAKER: str = "Sofia Hellen"
-    FIRST_LANGUAGE: str = "en"
-    SECOND_LANGUAGE: str = "es"
-    GPU: str = "cuda:6"
 
 
 def stream_whisper(

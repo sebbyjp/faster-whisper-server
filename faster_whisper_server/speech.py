@@ -115,7 +115,7 @@ speech_settings = {
     "sr": 16000,
 }
 speech_state = {
-    "speak_mode": "clear",
+    "speak_mode": "predict",
     "response": "",
     "spoken": "",
     "uncommitted": "",

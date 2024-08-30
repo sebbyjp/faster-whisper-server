@@ -2,30 +2,869 @@ Watching: '/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server' '
 
 /home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/numba/cpython/hashing.py:482: UserWarning: FNV hashing is not implemented in Numba. See PEP 456 https://www.python.org/dev/peps/pep-0456/ for rationale over not using FNV. Numba will continue to work, but hashes for built in types will be computed using siphash24. This will permit e.g. dictionaries to continue to behave as expected, however anything relying on the value of the hash opposed to hash as a derived property is likely to not work as expected.
   warnings.warn(msg)
+/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/TTS/api.py:70: UserWarning: `gpu` will be deprecated. Please use `tts.to(device)` instead.
+  warnings.warn("`gpu` will be deprecated. Please use `tts.to(device)` instead.")
  > tts_models/multilingual/multi-dataset/xtts_v2 is already downloaded.
  > Using model: xtts
 /home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/TTS/tts/layers/xtts/xtts_manager.py:5: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
   self.speakers = torch.load(speaker_file_path)
 /home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/TTS/utils/io.py:54: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
   return torch.load(f, map_location=map_location, **kwargs)
+Welcome to
+            _                 _  _ 
+ _ __ ___  | |__    ___    __| |(_)
+| '_ ` _ \ | '_ \  / _ \  / _` || |
+| | | | | || |_) || (_) || (_| || |
+|_| |_| |_||_.__/  \___/  \__,_||_|
+                                   
+
+A platform for intelligent embodied agents.
+
+
+Initializing language agent for robot using : openai
+Initializing language agent for robot using : openai
+/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py:1002: UserWarning: Expected 6 arguments for function <function process_state at 0x7fdbcdbfef20>, received 4.
+  warnings.warn(
+/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py:1006: UserWarning: Expected at least 6 arguments for function <function process_state at 0x7fdbcdbfef20>, received 4.
+  warnings.warn(
+/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py:1010: UserWarning: Expected maximum 4 arguments for function <bound method LanguageAgent.act of <mbodied.agents.language.language_agent.LanguageAgent object at 0x7fd9381f30d0>>, received 5.
+  warnings.warn(
+Running on local URL:  http://0.0.0.0:7862
+Initializing language agent for robot using : openai
+Initializing language agent for robot using : openai
+/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py:1002: UserWarning: Expected 6 arguments for function <function process_state at 0x7fdbcdbfef20>, received 4.
+  warnings.warn(
+/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py:1006: UserWarning: Expected at least 6 arguments for function <function process_state at 0x7fdbcdbfef20>, received 4.
+  warnings.warn(
+/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py:1010: UserWarning: Expected maximum 4 arguments for function <bound method LanguageAgent.act of <mbodied.agents.language.language_agent.LanguageAgent object at 0x7fd9385b9990>>, received 5.
+  warnings.warn(
+
+To create a public link, set `share=True` in `launch()`.
 Traceback (most recent call last):
-  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py", line 32, in <module>
-    from faster_whisper_server.speech import (
-  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/speech.py", line 146, in <module>
-    tts = TTS(model, gpu)
-          ^^^^^^^^^^^^^^^
-  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/TTS/api.py", line 81, in __init__
-    self.load_tts_model_by_path(
-  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/TTS/api.py", line 203, in load_tts_model_by_path
-    self.synthesizer = Synthesizer(
-                       ^^^^^^^^^^^^
-  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/TTS/utils/synthesizer.py", line 93, in __init__
-    self._load_tts(tts_checkpoint, tts_config_path, use_cuda)
-  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/TTS/utils/synthesizer.py", line 183, in _load_tts
-    self.tts_config = load_config(tts_config_path)
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/TTS/config/__init__.py", line 82, in load_config
-    ext = os.path.splitext(config_path)[1]
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "<frozen posixpath>", line 118, in splitext
-TypeError: expected str, bytes or os.PathLike object, not NoneType
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1532, in call_function
+    prediction = await utils.async_iteration(iterator)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 671, in async_iteration
+    return await iterator.__anext__()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 664, in __anext__
+    return await anyio.to_thread.run_sync(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 647, in run_sync_iterator_async
+    return next(iterator)
+           ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 809, in gen_wrapper
+    response = next(iterator)
+               ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py", line 367, in stream_audio
+    for state, transcription, transcription_tps in handle_audio_stream(
+                                                   ^^^^^^^^^^^^^^^^^^^^
+TypeError: handle_audio_stream() missing 1 required positional argument: 'audio_settings'
+/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/helpers.py:978: UserWarning: Unexpected argument. Filling with None.
+  warnings.warn("Unexpected argument. Filling with None.")
+PROCESS: Current state: {}, new transcription: , new instruction: , raw response: {'pred_instr_mode': 'predict', 'act_mode': 'wait', 'speak_mode': 'wait', 'transcription': '', 'instruction': ''}uncommitted: 
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1520, in call_function
+    prediction = await anyio.to_thread.run_sync(  # type: ignore
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 826, in wrapper
+    response = f(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/transition.py", line 22, in process_state
+    uncommitted = state["uncommitted"]
+                  ~~~~~^^^^^^^^^^^^^^^
+KeyError: 'uncommitted'
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1532, in call_function
+    prediction = await utils.async_iteration(iterator)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 671, in async_iteration
+    return await iterator.__anext__()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 664, in __anext__
+    return await anyio.to_thread.run_sync(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 647, in run_sync_iterator_async
+    return next(iterator)
+           ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 809, in gen_wrapper
+    response = next(iterator)
+               ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py", line 367, in stream_audio
+    for state, transcription, transcription_tps in handle_audio_stream(
+                                                   ^^^^^^^^^^^^^^^^^^^^
+TypeError: handle_audio_stream() missing 1 required positional argument: 'audio_settings'
+PROCESS: Current state: {}, new transcription: , new instruction: , raw response: {'pred_instr_mode': 'predict', 'act_mode': 'wait', 'speak_mode': 'wait', 'transcription': '', 'instruction': ''}uncommitted: 
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1520, in call_function
+    prediction = await anyio.to_thread.run_sync(  # type: ignore
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 826, in wrapper
+    response = f(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/transition.py", line 22, in process_state
+    uncommitted = state["uncommitted"]
+                  ~~~~~^^^^^^^^^^^^^^^
+KeyError: 'uncommitted'
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1532, in call_function
+    prediction = await utils.async_iteration(iterator)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 671, in async_iteration
+    return await iterator.__anext__()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 664, in __anext__
+    return await anyio.to_thread.run_sync(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 647, in run_sync_iterator_async
+    return next(iterator)
+           ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 809, in gen_wrapper
+    response = next(iterator)
+               ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py", line 367, in stream_audio
+    for state, transcription, transcription_tps in handle_audio_stream(
+                                                   ^^^^^^^^^^^^^^^^^^^^
+TypeError: handle_audio_stream() missing 1 required positional argument: 'audio_settings'
+PROCESS: Current state: {}, new transcription: , new instruction: , raw response: {'pred_instr_mode': 'predict', 'act_mode': 'wait', 'speak_mode': 'wait', 'transcription': '', 'instruction': ''}uncommitted: 
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1520, in call_function
+    prediction = await anyio.to_thread.run_sync(  # type: ignore
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 826, in wrapper
+    response = f(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/transition.py", line 22, in process_state
+    uncommitted = state["uncommitted"]
+                  ~~~~~^^^^^^^^^^^^^^^
+KeyError: 'uncommitted'
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1532, in call_function
+    prediction = await utils.async_iteration(iterator)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 671, in async_iteration
+    return await iterator.__anext__()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 664, in __anext__
+    return await anyio.to_thread.run_sync(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 647, in run_sync_iterator_async
+    return next(iterator)
+           ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 809, in gen_wrapper
+    response = next(iterator)
+               ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py", line 367, in stream_audio
+    for state, transcription, transcription_tps in handle_audio_stream(
+                                                   ^^^^^^^^^^^^^^^^^^^^
+TypeError: handle_audio_stream() missing 1 required positional argument: 'audio_settings'
+PROCESS: Current state: {}, new transcription: , new instruction: , raw response: {'pred_instr_mode': 'predict', 'act_mode': 'wait', 'speak_mode': 'wait', 'transcription': '', 'instruction': ''}uncommitted: 
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1520, in call_function
+    prediction = await anyio.to_thread.run_sync(  # type: ignore
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 826, in wrapper
+    response = f(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/transition.py", line 22, in process_state
+    uncommitted = state["uncommitted"]
+                  ~~~~~^^^^^^^^^^^^^^^
+KeyError: 'uncommitted'
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1532, in call_function
+    prediction = await utils.async_iteration(iterator)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 671, in async_iteration
+    return await iterator.__anext__()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 664, in __anext__
+    return await anyio.to_thread.run_sync(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 647, in run_sync_iterator_async
+    return next(iterator)
+           ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 809, in gen_wrapper
+    response = next(iterator)
+               ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py", line 367, in stream_audio
+    for state, transcription, transcription_tps in handle_audio_stream(
+                                                   ^^^^^^^^^^^^^^^^^^^^
+TypeError: handle_audio_stream() missing 1 required positional argument: 'audio_settings'
+PROCESS: Current state: {}, new transcription: , new instruction: , raw response: {'pred_instr_mode': 'predict', 'act_mode': 'wait', 'speak_mode': 'wait', 'transcription': '', 'instruction': ''}uncommitted: 
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1520, in call_function
+    prediction = await anyio.to_thread.run_sync(  # type: ignore
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 826, in wrapper
+    response = f(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/transition.py", line 22, in process_state
+    uncommitted = state["uncommitted"]
+                  ~~~~~^^^^^^^^^^^^^^^
+KeyError: 'uncommitted'
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1532, in call_function
+    prediction = await utils.async_iteration(iterator)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 671, in async_iteration
+    return await iterator.__anext__()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 664, in __anext__
+    return await anyio.to_thread.run_sync(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 647, in run_sync_iterator_async
+    return next(iterator)
+           ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 809, in gen_wrapper
+    response = next(iterator)
+               ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py", line 367, in stream_audio
+    for state, transcription, transcription_tps in handle_audio_stream(
+                                                   ^^^^^^^^^^^^^^^^^^^^
+TypeError: handle_audio_stream() missing 1 required positional argument: 'audio_settings'
+PROCESS: Current state: {}, new transcription: , new instruction: , raw response: {'pred_instr_mode': 'predict', 'act_mode': 'wait', 'speak_mode': 'wait', 'transcription': '', 'instruction': ''}uncommitted: 
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1520, in call_function
+    prediction = await anyio.to_thread.run_sync(  # type: ignore
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 826, in wrapper
+    response = f(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/transition.py", line 22, in process_state
+    uncommitted = state["uncommitted"]
+                  ~~~~~^^^^^^^^^^^^^^^
+KeyError: 'uncommitted'
+Changes detected in: /home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py
+/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py:1002: UserWarning: Expected 6 arguments for function <function process_state at 0x7fdbcdbfef20>, received 4.
+  warnings.warn(
+/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py:1006: UserWarning: Expected at least 6 arguments for function <function process_state at 0x7fdbcdbfef20>, received 4.
+  warnings.warn(
+/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py:1010: UserWarning: Expected maximum 4 arguments for function <bound method LanguageAgent.act of <mbodied.agents.language.language_agent.LanguageAgent object at 0x7fd9385b9990>>, received 5.
+  warnings.warn(
+Changes detected in: /home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1532, in call_function
+    prediction = await utils.async_iteration(iterator)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 671, in async_iteration
+    return await iterator.__anext__()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 664, in __anext__
+    return await anyio.to_thread.run_sync(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 647, in run_sync_iterator_async
+    return next(iterator)
+           ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 809, in gen_wrapper
+    response = next(iterator)
+               ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py", line 367, in stream_audio
+    for state, transcription, transcription_tps in handle_audio_stream(
+                                                   ^^^^^^^^^^^^^^^^^^^^
+TypeError: handle_audio_stream() missing 1 required positional argument: 'audio_settings'
+PROCESS: Current state: {}, new transcription: , new instruction: , raw response: {'pred_instr_mode': 'predict', 'act_mode': 'wait', 'speak_mode': 'wait', 'transcription': '', 'instruction': ''}uncommitted: 
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1520, in call_function
+    prediction = await anyio.to_thread.run_sync(  # type: ignore
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 826, in wrapper
+    response = f(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/transition.py", line 22, in process_state
+    uncommitted = state["uncommitted"]
+                  ~~~~~^^^^^^^^^^^^^^^
+KeyError: 'uncommitted'
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1532, in call_function
+    prediction = await utils.async_iteration(iterator)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 671, in async_iteration
+    return await iterator.__anext__()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 664, in __anext__
+    return await anyio.to_thread.run_sync(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 647, in run_sync_iterator_async
+    return next(iterator)
+           ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 809, in gen_wrapper
+    response = next(iterator)
+               ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py", line 367, in stream_audio
+    for state, transcription, transcription_tps in handle_audio_stream(
+                                                   ^^^^^^^^^^^^^^^^^^^^
+TypeError: handle_audio_stream() missing 1 required positional argument: 'audio_settings'
+PROCESS: Current state: {}, new transcription: , new instruction: , raw response: {'pred_instr_mode': 'predict', 'act_mode': 'wait', 'speak_mode': 'wait', 'transcription': '', 'instruction': ''}uncommitted: 
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1520, in call_function
+    prediction = await anyio.to_thread.run_sync(  # type: ignore
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 826, in wrapper
+    response = f(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/transition.py", line 22, in process_state
+    uncommitted = state["uncommitted"]
+                  ~~~~~^^^^^^^^^^^^^^^
+KeyError: 'uncommitted'
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1532, in call_function
+    prediction = await utils.async_iteration(iterator)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 671, in async_iteration
+    return await iterator.__anext__()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 664, in __anext__
+    return await anyio.to_thread.run_sync(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 647, in run_sync_iterator_async
+    return next(iterator)
+           ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 809, in gen_wrapper
+    response = next(iterator)
+               ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py", line 367, in stream_audio
+    for state, transcription, transcription_tps in handle_audio_stream(
+                                                   ^^^^^^^^^^^^^^^^^^^^
+TypeError: handle_audio_stream() missing 1 required positional argument: 'audio_settings'
+PROCESS: Current state: {}, new transcription: , new instruction: , raw response: {'pred_instr_mode': 'predict', 'act_mode': 'wait', 'speak_mode': 'wait', 'transcription': '', 'instruction': ''}uncommitted: 
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1520, in call_function
+    prediction = await anyio.to_thread.run_sync(  # type: ignore
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 826, in wrapper
+    response = f(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/transition.py", line 22, in process_state
+    uncommitted = state["uncommitted"]
+                  ~~~~~^^^^^^^^^^^^^^^
+KeyError: 'uncommitted'
+Changes detected in: /home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py
+Changes detected in: /home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/speech.py
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1532, in call_function
+    prediction = await utils.async_iteration(iterator)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 671, in async_iteration
+    return await iterator.__anext__()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 664, in __anext__
+    return await anyio.to_thread.run_sync(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 647, in run_sync_iterator_async
+    return next(iterator)
+           ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 809, in gen_wrapper
+    response = next(iterator)
+               ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py", line 367, in stream_audio
+    for state, transcription, transcription_tps in handle_audio_stream(
+                                                   ^^^^^^^^^^^^^^^^^^^^
+TypeError: handle_audio_stream() missing 1 required positional argument: 'audio_settings'
+PROCESS: Current state: {}, new transcription: , new instruction: , raw response: {'pred_instr_mode': 'predict', 'act_mode': 'wait', 'speak_mode': 'wait', 'transcription': '', 'instruction': ''}uncommitted: 
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1520, in call_function
+    prediction = await anyio.to_thread.run_sync(  # type: ignore
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 826, in wrapper
+    response = f(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/transition.py", line 22, in process_state
+    uncommitted = state["uncommitted"]
+                  ~~~~~^^^^^^^^^^^^^^^
+KeyError: 'uncommitted'
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1532, in call_function
+    prediction = await utils.async_iteration(iterator)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 671, in async_iteration
+    return await iterator.__anext__()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 664, in __anext__
+    return await anyio.to_thread.run_sync(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 647, in run_sync_iterator_async
+    return next(iterator)
+           ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 809, in gen_wrapper
+    response = next(iterator)
+               ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py", line 367, in stream_audio
+    for state, transcription, transcription_tps in handle_audio_stream(
+                                                   ^^^^^^^^^^^^^^^^^^^^
+TypeError: handle_audio_stream() missing 1 required positional argument: 'audio_settings'
+PROCESS: Current state: {}, new transcription: , new instruction: , raw response: {'pred_instr_mode': 'predict', 'act_mode': 'wait', 'speak_mode': 'wait', 'transcription': '', 'instruction': ''}uncommitted: 
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1520, in call_function
+    prediction = await anyio.to_thread.run_sync(  # type: ignore
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 826, in wrapper
+    response = f(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/transition.py", line 22, in process_state
+    uncommitted = state["uncommitted"]
+                  ~~~~~^^^^^^^^^^^^^^^
+KeyError: 'uncommitted'
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1532, in call_function
+    prediction = await utils.async_iteration(iterator)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 671, in async_iteration
+    return await iterator.__anext__()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 664, in __anext__
+    return await anyio.to_thread.run_sync(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 647, in run_sync_iterator_async
+    return next(iterator)
+           ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 809, in gen_wrapper
+    response = next(iterator)
+               ^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/stt.py", line 367, in stream_audio
+    for state, transcription, transcription_tps in handle_audio_stream(
+                                                   ^^^^^^^^^^^^^^^^^^^^
+TypeError: handle_audio_stream() missing 1 required positional argument: 'audio_settings'
+PROCESS: Current state: {}, new transcription: , new instruction: , raw response: {'pred_instr_mode': 'predict', 'act_mode': 'wait', 'speak_mode': 'wait', 'transcription': '', 'instruction': ''}uncommitted: 
+Traceback (most recent call last):
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/queueing.py", line 536, in process_events
+    response = await route_utils.call_process_api(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/route_utils.py", line 321, in call_process_api
+    output = await app.get_blocks().process_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1935, in process_api
+    result = await self.call_function(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/blocks.py", line 1520, in call_function
+    prediction = await anyio.to_thread.run_sync(  # type: ignore
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2177, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 859, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/.venv/lib/python3.11/site-packages/gradio/utils.py", line 826, in wrapper
+    response = f(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/seb/audio/faster-whisper-server/faster_whisper_server/transition.py", line 22, in process_state
+    uncommitted = state["uncommitted"]
+                  ~~~~~^^^^^^^^^^^^^^^
+KeyError: 'uncommitted'
