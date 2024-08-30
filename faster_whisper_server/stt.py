@@ -354,7 +354,6 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
                     "speak_mode": "wait",
                     "transcription": "",
                     "instruction": "",
-                    "uncommitted": "",
                 }
             )
 
@@ -365,16 +364,14 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
             ) -> Iterator[tuple[dict, str, str]]:
                 audio_state = get_audio_state()
                 audio_state["model"] = model
-                audio_settings = get_speech_settings()
                 for state, transcription, transcription_tps in handle_audio_stream(
                     audio,
                     audio_state,
                     0.0,
                     http_client,
-                    audio_settings,
                 ):
                     update_audio_state(state)
-                    yield state, transcription, transcription_tps
+                    yield get_audio_state(), transcription, transcription_tps
 
             audio.stream(
                 fn=stream_audio,
@@ -386,7 +383,7 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
                 outputs=[audio_state, transcription, transcription_tps],
             ).then(
                 process_state,
-                inputs=[transcription, instruction, response_raw, agent_state, first_speaker_language, second_speaker_language],
+                inputs=[transcription, instruction, response_raw, agent_state],
                 outputs=[agent_state, transcription, instruction, response],
             )
             transcription.change(
@@ -473,5 +470,5 @@ if __name__ == "__main__":
 
     log.add(RichHandler(), level="DEBUG")
     demo.queue().launch(
-        server_name="0.0.0.0", share=False, show_error=True, debug=True, root_path="/instruct", server_port=7862
+        server_name="0.0.0.0", share=False, show_error=True, debug=True, root_path="/instruct", server_port=7861
     )
