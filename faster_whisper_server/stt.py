@@ -362,8 +362,7 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
                 audio: tuple[int, np.ndarray],
                 audio_state: dict,
                 model: str,
-            ) -> Iterator[tuple[str, str]]:
-                # print(f"THIS IS THE AUDIO STATE: {audio_state}")
+            ) -> Iterator[tuple[dict, str, str]]:
                 audio_state = get_audio_state()
                 audio_state["model"] = model
                 for state, transcription, transcription_tps in handle_audio_stream(

@@ -156,7 +156,7 @@ def speak(text: str, state: Dict, speaker: str, language: str, second_speaker: s
     print(f"Input text: {text}")
     print(f"Initial mode: {mode}")
 
-    if not text or len(text.split()) < 3 and not (text.endswith((".", "?", "!"))) or mode in ("clear", "wait"):
+    if not text or (len(text.split()) < 3 and not text.endswith((".", "?", "!"))) or mode in ("clear", "wait"):
         state["speak_mode"] = "wait"
         print("Text too short or mode is clear/wait. Yielding empty array.")
         yield (sr, np.array([], dtype=np.int16)), state
