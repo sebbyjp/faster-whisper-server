@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 
-from faster_whisper_server.config import config
+from faster_whisper_server.audio_config import config
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
