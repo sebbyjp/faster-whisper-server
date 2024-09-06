@@ -1,5 +1,5 @@
 aiofiles==22.1.0
-mbodied==1.0.9
+mbodied==1.2.1
 altair==5.3.0
 annotated-types==0.7.0
 anyio==4.4.0
@@ -46,7 +46,7 @@ mdurl==0.1.2
 mpmath==1.3.0
 numpy==1.26.4
 onnxruntime==1.18.1
-openai==1.40.2
+openai==1.43.0
 orjson==3.10.7
 packaging==24.1
 pandas==2.2.2
@@ -90,3 +90,4 @@ uvloop==0.19.0
 watchfiles==0.23.0
 websockets==12.0
 bark==0.1.5
+pyannote.audio

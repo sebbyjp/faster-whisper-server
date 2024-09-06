@@ -52,7 +52,7 @@ dependencies = [
     'markdown-it-py==3.0.0',
     'markupsafe==2.1.5',
     'matplotlib==3.9.1',
-    'mbodied==1.0.9',
+    'mbodied==1.2.1',
     'mdurl==0.1.2',
     'mpmath==1.3.0',
     'numpy==1.26.4',

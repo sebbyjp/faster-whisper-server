@@ -1,7 +1,6 @@
 import collections
 from collections.abc import Iterator
 from functools import partial
-import multiprocessing
 import os
 import re
 import threading
@@ -94,7 +93,7 @@ and we are demonstrating your instruction following capabilities. Note that you 
 
 ### Weak Agent ###
 DETERMINE_INSTRUCTION_PROMPT = """
-Determine if the statement after POTENTIAL INSTRUCTION is an instruction for a robot to take action. Answer "Yes", "No", or "Incomplete Statement".
+Determine if the statement after POTENTIAL INSTRUCTION is an instruction for a robot to take action, other statement, or incomplete statement. Answer "Yes", "No", or "Incomplete".
 
 PORENTIAL INSTRUCTION:
 """
@@ -110,6 +109,8 @@ _agent_state: dict[str, Any] = {
     "spoken": "",
     "moving": False,
     "audio_array": np.array([0], dtype=np.int16),
+    "audio_finish_time": float("inf"),
+    "speech_fragments": 0,
 }
 
 _audio_state: dict[str, Any] = {
@@ -130,6 +131,25 @@ def update_state(updates: dict[str, Any]) -> None:
     with state_lock:
         _agent_state.update(updates)
 
+def clear_states() -> None:
+    with state_lock:
+        _agent_state.clear()
+        _agent_state.update({
+            "pred_instr_mode": "predict",
+            "act_mode": "wait",
+            "speak_mode": "wait",
+            "transcription": "",
+            "instruction": "",
+            "response": "",
+            "first_act": False,
+        })
+    with audio_lock:
+        _audio_state.update({
+            "stream": np.array([]),
+            "model": "Systran/faster-distil-whisper-large-v3",
+            "temperature": 0.0,
+            "endpoint": "/audio/transcriptions"
+        })
 def get_audio() -> dict[str, Any]:
     with audio_lock:
         return _audio_state
@@ -181,34 +201,21 @@ ActMode = Literal["acting", "repeat", "clear", "wait"]
 SpeakMode = Literal["speaking", "wait", "clear"]
 
 
-# class AgentState(State):
-#     pred_instr_mode: Literal["predict", "repeat", "clear", "wait"]
-#     act_mode: Literal["acting", "repeat", "clear", "wait"]
-#     speak_mode: Literal["speaking", "wait", "clear"]
-#     transcription: str
-#     instruction: str
-
-
-
 def predict_instruction(transcription: str, last_instruction: str) -> Iterator[tuple[str, dict]]:  # noqa: UP006
     update_state({"transcription": transcription})
     state = get_state()
-    if not state.get("transcription"):
-        return ""
+
     state = get_state()
     print(f"PREDICTION: state: {state}")
     mode = state["pred_instr_mode"]
     if mode == "clear" or not transcription or not transcription.strip():
-        update_state({"pred_instr_mode": "wait"})
-        return "", state
+        clear_states()
+        return ""
     if mode == "repeat":
-        update_state({"pred_instr_mode": "repeat"})
+        update_state({"pred_instr_mode": "repeat", "instruction": last_instruction})
         return last_instruction
-
-    if transcription == NOT_A_COMPLETE_INSTRUCTION:
-        console.print("ERROR: ERROR", style="bold red")
-        msg = "Instruction is not a complete instruction."
-        raise ValueError(msg)
+    if not state.get("transcription") or (len(state["transcription"].split()) < 2 and not state["transcription"].endswith((".", "?", "!"))):
+        return NOT_A_COMPLETE_INSTRUCTION
 
     yprint(f"Text: {transcription}, Mode Predict: {state}, Last instruction: {last_instruction}")
 
@@ -245,17 +252,11 @@ def act(instruction: str, last_response: str, last_tps: str) -> Iterator[tuple[s
     instruction = state["instruction"]
     mode = state["act_mode"]
     if mode in ("clear", "wait"):
-        update_state({"act_mode": "wait"})
-        update_state({"spoken": "", "audio_array": np.array([0], dtype=np.int16), "uncommitted": "",
-            "speak_mode": "wait", "response": "", "transcription": "", "instruction": "", "act_mode": "wait", "pred_instr_mode": "predict"})
         return "", last_tps
 
     if mode == "repeat":
         update_state({"act_mode": "repeat"})
         return last_response, last_tps
-    if mode not in ["acting", "wait"]:
-        console.print(f"ERROR: Invalid mode: {mode}", style="bold red")
-        raise ValueError(f"Invalid mode: {mode}")
 
     if len(agent.history()) > 10:
         agent.forget_after(2)
@@ -280,79 +281,6 @@ def act(instruction: str, last_response: str, last_tps: str) -> Iterator[tuple[s
     update_state({"act_mode": "repeat", "response": response, "speak_mode": "speaking"})
     return response, f"TPS: {tokens_per_sec:.4f}"
 
-# def speak(text: str, state: dict, speaker: str, language: str) -> Iterator[tuple[bytes, str, dict]]:  # noqa: UP006
-#     """Generate and stream TTS audio using Coqui TTS with diarization."""
-#     state = get_state()
-#     text = state["response"]
-#     mode = state["speak_mode"]
-#     sr = tts.synthesizer.output_sample_rate
-
-#     if text and len(text.split()) < 3 and not (text.endswith((".", "?", "!"))):
-#         state["speak_mode"] = "wait"
-#         return
-
-#     if mode in ("clear", "wait"):
-#         state["speak_mode"] = "wait"
-#         return
-
-#     sentences = [sentence.strip() for sentence in re.split(r"[.?!]", text) if sentence.strip()]
-#     # sentences = [sentence.strip() for sentence in sentences if sentence.strip()]
-#     sentences = [*sentences, ""]
-#     spoken = state["spoken"]
-#     audio_array = state["audio_array"]
-#     spoken_idx = 0
-#     for sentence in sentences:
-#         print(f"entering sentence: {sentence}")
-#         if sentence and not (spoken and spoken.endswith(sentence)):
-#             audio_array = (np.array(tts.tts(sentence, speaker=speaker, language=language, split_sentences=False)) * 32767).astype(
-#                 np.int16
-#             )
-#             if get_state()["speak_mode"] == "clear":
-#                 update_state({"speak_mode": "wait", "spoken": "", "audio_array": np.array([0], dtype=np.int16), "uncommitted": "", "response": ""})
-#                 return
-#             console.print(f"SPEAK Text: {sentence}, Mode Speak: {mode}", style="bold white on blue")
-#             state["speak_mode"] = "speaking"
-#             spoken += sentence
-
-#             update_state({"speak_mode": "speaking", "spoken": spoken, "audio_array": audio_array, "act_mode": "repeat"})
-#             f=f"out{spoken_idx}.wav"
-#             sf.write(file=f, data=audio_array,samplerate=sr)
-#             yield (sr, audio_array)
-#             # for i in range(0, len(audio_array), sr):
-#             #     console.print(f"Playing audio: {i}", style="bold white on blue")
-#             #     if get_state()["speak_mode"] == "clear":
-#             #         update_state({"speak_mode": "wait", "spoken": "", "audio_array": np.array([0], dtype=np.int16), "uncommitted": "", "response": ""})
-#             #         return
-#             #     sf.write(file=f"out_inner{i+1}.wav", data=audio_array,samplerate=sr)
-#             #     # yield (sr, audio_array[i:i + sr].copy())
-#             #     # sleep(1)
-
-
-#             # yield  audio_array[i + sr:].copy(), state
-#             # def stream_bytes(audio_file):
-#             #     chunk_size = sr
-#             #     with open(audio_file, "rb") as f:
-#             #         while True:
-#             #             chunk = f.read(chunk_size)
-#             #             if chunk:
-#             #                 yield chunk
-#             #                 sleep(1)
-#             #             else:
-#             #                 console.print("Done speaking.", style="bold white on blue")
-#             #                 break
-#             # for chunk in stream_bytes(f):
-#             #     if get_state()["speak_mode"] == "clear":
-#             #         update_state({"speak_mode": "wait", "spoken": "", "audio_array": np.array([0], dtype=np.int16), "uncommitted": "", "response": ""})
-#             #         return
-#             #     yield chunk
-#         else:
-#             continue
-#     state["speak_mode"] = "finished"
-#     update_state({"speak_mode": "finished", "spoken": "", "audio_array": np.array([0], dtype=np.int16), "uncommitted": "", "response": ""})
-#     update_state({"pred_instr_mode": "predict", "act_mode": "wait", "speak_mode": "wait", "transcription": "", "instruction": ""})
-#     console.print("Done speaking.", style="bold white on blue")
-#     return 
-
 def speak(text: str, speaker: str, language: str) -> Iterator[tuple[bytes, str, dict]]:
     """Generate and stream TTS audio using Coqui TTS with diarization."""
     state = get_state()
@@ -368,28 +296,30 @@ def speak(text: str, speaker: str, language: str) -> Iterator[tuple[bytes, str, 
 
 
         # Check if this is a new response and reset spoken_idx
-    if state["spoken"] == "" and state.setdefault("spoken_idx", 0) > 0:
-        console.print("New response detected, resetting spoken_idx to 0.", style="bold green")
-        state["spoken_idx"] = 0  # Reset spoken_idx for a new response
+    # if state["spoken"] == "" and state.setdefault("spoken_idx", 0) > 0:
+    #     console.print("New response detected, resetting spoken_idx to 0.", style="bold green")
+    #     update_state({"spoken_idx": 0})
     # Handle incomplete sentences more gracefully
-    if text and len(text.split()) < 2 and not (text.endswith((".", "?", "!"))):
+    if text and len(text.split()) < 2 and not (text.endswith((".", "?", "!"))) and state["act_mode"] != "repeat":
         return
 
-    if mode in ("clear", "wait"):
-        state["speak_mode"] = "wait"
-        update_state({"speak_mode": "wait", "spoken": "", "audio_array": np.array([0], dtype=np.int16), "uncommitted": "", "response": ""})
+    if mode == "clear":
+        clear_states()
+        return
+    if mode == "wait":
         return
 
-    # Split the text and keep the punctuation
+
+        # Split the text and keep the punctuation
     sentences = [sentence.strip() + punct for sentence, punct in re.findall(r"([^.!?]*)([.!?])", text) if sentence.strip()]
-    sentences = [*sentences, ""]  # Add empty string to signify the end
-    spoken_idx = state.get("spoken_idx", 0)
-    audio_array = state.get("audio_array", np.array([0], dtype=np.int16))
+        # sentences = [*sentences]
+        # update_state({"sentences": sentences})
+    # spoken_idx = state.get("spoken_idx", 0)
 
-    console.print(f"Sentences: {sentences}, spoken_idx: {spoken_idx}, spoken: {spoken}", style="red")
+    console.print(f"Sentences: {sentences}, spoken_idx:, spoken: {spoken}", style="red")
 
     # Speak each sentence
-    for idx, sentence in enumerate(sentences[spoken_idx:], spoken_idx):
+    for idx, sentence in enumerate(sentences):
         if sentence and sentence not in spoken:
             print(f"Speaking sentence: {sentence}")
 
@@ -397,99 +327,51 @@ def speak(text: str, speaker: str, language: str) -> Iterator[tuple[bytes, str, 
             audio_array = (np.array(tts.tts(sentence, speaker=speaker, language=language, split_sentences=False)) * 32767).astype(np.int16)
 
             if state["speak_mode"] == "clear":
-                print("Clearing speak mode")
-                update_state({"speak_mode": "wait", "spoken": "", "audio_array": np.array([0], dtype=np.int16), "uncommitted": "", "response": ""})
+                clear_states()
                 return
 
             # Log the sentence and mark the state as speaking
             console.print(f"SPEAK Text: {sentence}, Mode Speak: {mode}", style="bold white on blue")
-            state["speak_mode"] = "speaking"
             spoken += sentence
-
+            audio_seconds = len(audio_array) / float(sr)
+            console.print(f"Audio seconds: {audio_seconds}", style="bold white on blue")
             # Update state
             update_state({
                 "speak_mode": "speaking",
                 "spoken": spoken,
                 "audio_array": audio_array,
                 "act_mode": "repeat",
-                "spoken_idx": idx + 1  # Move to the next sentence
+                "spoken_idx": idx + 1,  # Move to the next sentence
+                "audio_finish_time": time() + audio_seconds,
             })
-
             # Save audio to file and yield audio output
             f = f"out{idx}.wav"
             sf.write(file=f, data=audio_array, samplerate=sr)
-            yield (sr, audio_array)
-            sleep(1)
+            return f
 
-        # Final check for completion
-        if spoken_idx >= len(sentences) - 1:
-            state["speak_mode"] = "wait"  # Set to wait once done
-            update_state({"speak_mode": "wait", "spoken": "", "audio_array": np.array([0], dtype=np.int16), "uncommitted": "", "response": "",
-                          "act_mode": "wait", "pred_instr_mode": "predict", "speak_mode": "wait", "transcription": "", "instruction": ""})
-            console.print("Done speaking.", style="bold white on blue")
+    # if spoken_idx >= len(sentences) - 1:
 
-# def speak(text: str, speaker: str, language: str) -> Iterator[tuple[bytes, str, dict]]:
-#     """Generate and stream TTS audio using Coqui TTS with diarization."""
-#     state = get_state()
-#     console.print(f"speak STATE: {state}")
-#     text = state["response"]
-#     mode = state["speak_mode"]
-#     sr = tts.synthesizer.output_sample_rate
-#     spoken = state.get("spoken", "")
-#     console.print(f"Text: {text}, Mode Speak: {mode} spoken {spoken}", style="red")
-#     # Handle incomplete sentences more gracefully
-#     if text and len(text.split()) < 2 and not (text.endswith((".", "?", "!"))):
-#         return
+    update_state({"speak_mode": "wait", "spoken": "", "audio_array": np.array([0], dtype=np.int16), "uncommitted": "", "response": "",
+                    "act_mode": "wait", 
+                    "audio_finish_time": float("inf"),
+                    "first_act": False,
+                    "pred_instr_mode": "predict", "transcription": "", "instruction": "",
+                    "sentences": [], "spoken_idx": 0,     "stream": np.array([])})
 
-#     if mode in ("clear", "wait"):
-#         state["speak_mode"] = "wait"
-#         update_state({"speak_mode": "wait", "spoken": "", "audio_array": np.array([0], dtype=np.int16), "uncommitted": "", "response": ""})
-#         return
+    # console.print("Done speaking.", style="bold white on blue")
+    # Final check for completion
+    # if spoken_idx >= len(sentences) - 1:
+    #     update_state({"speak_mode": "wait", "spoken": "", "audio_array": np.array([0], dtype=np.int16),
+    #      "uncommitted": "", "act_mode": "wait",
+    #     "sentences": [], "spoken_idx": 0, "audio_finish_time": 0,     "stream": np.array([])})
+    #     console.print("Done speaking.", style="bold white on blue")
+    # if get_state()["speak_mode"] == "clear":
+    #     update_state({"speak_mode": "wait", "spoken": "", "audio_array": np.array([0], dtype=np.int16),
+    #      "uncommitted": "", "response": "", "act_mode": "wait", "pred_instr_mode": "predict",
+    #       "transcription": "", "instruction": "", "sentences": [], "spoken_idx": 0, "audio_finish_time": 0, "stream": np.array([])})
 
 
-#     # Split the text but keep the punctuation
-#     sentences = [sentence.strip() + punct for sentence, punct in re.findall(r"([^.!?]*)([.!?])", text) if sentence.strip()]
-#     sentences = [*sentences, ""]  # Add empty string to signify the end
-#     spoken = state.get("spoken", "")
-#     spoken_idx = state.get("spoken_idx", 0)
-#     audio_array = state.get("audio_array", np.array([0], dtype=np.int16))
-#     console.print(f"Sentences: {sentences}, spoken_idx: {spoken_idx}, spoken: {spoken}", style="red")
-#     for idx, sentence in enumerate(sentences[spoken_idx:], spoken_idx):
-#         if sentence and not sentence in spoken:
-#             print(f"Speaking sentence: {sentence}")
 
-#             # Synthesize speech for the sentence
-#             audio_array = (np.array(tts.tts(sentence, speaker=speaker, language=language, split_sentences=False)) * 32767).astype(np.int16)
-            
-#             if state["speak_mode"] == "clear":
-#                 print("Clearing speak mode")
-#                 update_state({"speak_mode": "wait", "spoken": "", "audio_array": np.array([0], dtype=np.int16), "uncommitted": "", "response": ""})
-#                 return
-            
-#             # Log the sentence and mark the state as speaking
-#             console.print(f"SPEAK Text: {sentence}, Mode Speak: {mode}", style="bold white on blue")
-#             state["speak_mode"] = "speaking"
-#             spoken += sentence
-
-#             # Update state
-#             update_state({
-#                 "speak_mode": "speaking", 
-#                 "spoken": spoken, 
-#                 "audio_array": audio_array, 
-#                 "act_mode": "repeat",
-#                 "spoken_idx": idx + 1  # Move to the next sentence
-#             })
-
-#             # Save audio to file and yield audio output
-#             f = f"out{idx}.wav"
-#             sf.write(file=f, data=audio_array, samplerate=sr)
-#             yield (sr, audio_array)
-        
-#         if spoken_idx >= len(sentences) - 1 and state["response"] in state["spoken"]:
-#             state["speak_mode"] = "wait"  # Set to wait once done
-#             update_state({"speak_mode": "wait", "spoken": "", "audio_array": np.array([0], dtype=np.int16), "uncommitted": "", "response": "",
-#                 "act_mode": "wait", "pred_instr_mode": "predict", "speak_mode": "wait", "transcription": "", "instruction": ""})
-#             console.print("Done speaking.", style="bold white on blue")
 
 def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Blocks:
     with gr.Blocks(
@@ -500,14 +382,6 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
         title="Personal Assistant",
         delete_cache=[0,0]
     ) as demo:
-        # audio_out = gr.Audio(streaming=True, autoplay=True, label="Output", visible=False, render=False)
-        # temperature_slider = gr.Slider(minimum=0.0, maximum=1.0, step=0.1, label="Temperature", value=0.0, render=False)
-
-        # state = gr.State(
-        #     State(pred_instr_mode="predict", act_mode="wait", speak_mode="wait", transcription="", instruction="")
-        # )
-
-        # task_config = gr.State(task, render=False)
 
         def update_model_dropdown() -> gr.Dropdown:
             models = openai_client.models.list().data
@@ -521,12 +395,7 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
                 value=config.whisper.model,
             )
 
-    
-    
-
-
-
-        clear_button = gr.Button(value="Clear", render=True, variant="secondary")
+        clear_button = gr.Button(value="Clear", render=True, variant="primary")
 
         with gr.Row():
                 audio = gr.Audio(
@@ -536,7 +405,7 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
                     streaming=True,
                     interactive=True,
                 )
-                audio_out = gr.Audio(streaming=True, autoplay=True, label="Output", visible=True, render=True)
+                audio_out = gr.Audio(streaming=False, autoplay=True, label="Output", visible=True, render=True, type="filepath")
                 model_dropdown = gr.Dropdown(
                     choices=[config.whisper.model],
                     label="Model",
@@ -592,6 +461,13 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
                 # print(f"THIS IS THE AUDIO STATE: {audio_state}")
                 audio_state = get_audio()
                 audio_state["model"] = model
+
+                updated_stream = False
+                stream = get_state().get("stream")
+                if stream is not None:
+                    audio_state["stream"] = stream
+                    updated_stream = True
+
                 for state, transcription, transcription_tps in handle_audio_stream(
                     audio,
                     audio_state,
@@ -602,6 +478,9 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
                     if "Not enough audio yet." in transcription:
                         transcription = ""
                     yield get_audio(), transcription, transcription_tps
+
+                    if updated_stream:
+                        update_state({"stream": None})
 
             audio.stream(
                 fn=stream_audio,
@@ -622,24 +501,46 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
                 inputs=[instruction, response, response_tps],
                 outputs=[response, response_tps],
             )
-            # response.change(
+            response.change(
+                speak,
+                inputs=[response, first_speaker_name, first_speaker_language],
+                outputs=[audio_out],
+                # trigger_mode="always_last",
+            )
+
+            # def increment_speech():
+            #     state = get_state()
+            #     num_speech_fragments = state.get("speech_fragments", 0)
+            #     if state.get("act_mode") == "repeat" and not state.get("first_act"):
+            #         update_state({"first_act": True})
+            #         num_speech_fragments += 1
+            #         return num_speech_fragments
+            #     if time() < state.get("audio_finish_time", float("inf")):
+            #         return num_speech_fragments
+
+            #     num_speech_fragments += 1
+            #     yprint(f"Incrementing speech fragments to {num_speech_fragments}")
+            #     update_state({"speech_fragments": num_speech_fragments, "audio_finish_time": float("inf")})
+            #     return num_speech_fragments
+
+            # speech_fragments = gr.Number(label="Speech Fragments", value=increment_speech, visible=False, every=1)
+            # gr.on(
+            #     [speech_fragments.change],
             #     speak,
-            #     inputs=[response, agent_state, first_speaker_name, first_speaker_language],
-            #     outputs=[audio_out, agent_state],
-            #     trigger_mode="always_last",
+            #     inputs=[response, second_speaker_name, second_speaker_language],
+            #     outputs=[audio_out],
             # )
-            timer = Timer(1)
+            speak_button = gr.Button(value="Speak", render=True, variant="secondary")
             gr.on(
-                [timer.tick],
+                [speak_button.click],
                 speak,
                 inputs=[response, second_speaker_name, second_speaker_language],
                 outputs=[audio_out],
-                trigger_mode="always_last",
             )
             def clear_button_click():
-                update_state({"pred_instr_mode": "clear", "act_mode": "clear", "speak_mode": "clear"})
-                update_audio({"stream": np.array([]), "model": model_dropdown.value, "temperature": 0.0, "endpoint": task_config.TRANSCRIPTION_ENDPOINT})
+                clear_states()
                 return "", "", ""
+
             clear_button.click(
                 clear_button_click,
                 inputs=[],
@@ -655,6 +556,6 @@ if __name__ == "__main__":
     from rich.logging import RichHandler
 
     log.add(RichHandler(), level="DEBUG")
-    demo.launch(
+    demo.queue().launch(
         server_name="0.0.0.0", share=False, show_error=True, debug=True, root_path="/instruct", server_port=7861
     )
