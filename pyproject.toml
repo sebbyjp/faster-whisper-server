@@ -105,7 +105,7 @@ dependencies = [
     'websockets==11.0.3',
 ]
 [project.optional-dependencies]
-dev = ["ruff==0.5.3", "pytest", "webvtt-py", "srt", "basedpyright"]
+dev = ["ruff==0.5.3", "pytest", "webvtt-py", "srt", "basedpyright", "pytest-cov"]
 other = ["youtube-dl @ git+https://github.com/ytdl-org/youtube-dl.git@37cea84f775129ad715b9bcd617251c831fcc980", "aider-chat==0.39.0"]
 # https://docs.astral.sh/ruff/configuration/
 [tool.ruff]
