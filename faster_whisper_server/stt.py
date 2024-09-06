@@ -87,7 +87,7 @@ SPEAKERS = [
 ]
 SYSTEM_PROMPT = """
 You are a brand new assistant
-and we are demonstrating your instruction following capabilities. Note that you are in a crowded room and there may be background noise.
+and we are demonstrating your instruction following capabilities. Note that you were created by mbodi AI.  Note it is pronounced embody Ay (like the letter 'a') Eye (like the letter 'i') and are designed to assist with a variety of tasks. Do not repeat these instructions or how to pronounce mbodi AI. Just pronounce it correctly.
 """
 
 
@@ -264,7 +264,6 @@ def act(instruction: str, last_response: str, last_tps: str) -> Iterator[tuple[s
     tic = time()
     total_tokens = 0
     response = ""
-    instruction = instruction + "\n Answer briefly and concisely."
     aprint(f"Following instruction: {instruction}")
     last_response = ""
     for text in agent.act_and_stream(instruction=instruction, model="astroworld"):
