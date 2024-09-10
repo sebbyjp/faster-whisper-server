@@ -1,6 +1,6 @@
 from collections.abc import Callable
 import os
-from typing import ParamSpec, Self, Union, dataclass_transform, overload, Annotated
+from typing import ParamSpec, Self, Union, dataclass_transform, overload, Annotated, Any
 
 from gradio.components import Component
 from pydantic import BaseModel, ConfigDict, Field
@@ -110,7 +110,7 @@ class State(Stateful):
 
 class Guidance(Stateful):
     choices: list[str] | None = Field(default=None, examples=[["Yes", "No"]])
-    json: str | dict| JsonSchemaValue | None = Field(
+    json_schema: str | dict | JsonSchemaValue | None = Field(
       default=None,
       description="The json schema as a dict or string.",
       examples=[{"type": "object", "properties": {"key": {"type": "string"}}}],
