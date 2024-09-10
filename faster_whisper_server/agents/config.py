@@ -129,7 +129,6 @@ class CompletionConfig(Stateful):
     response_modifier: Annotated[Callable[[str, str, Union[State, None]], str] | BaseAgentConfig | None, SkipJsonSchema] = Field(default=None, description="A callable or agent that takes the prompt, response, and state and returns a modified prompt.")
     reminder: str | None = Field(default=None, examples=["Remember to respond with only the translated text and nothing else."])
 
-@dataclass_transform(order_default=False)
 class AgentConfig(BaseAgentConfig):
     base_url: str = "https://api.mbodi.ai/v1"
     auth_token: str = "mbodi-demo-1"
