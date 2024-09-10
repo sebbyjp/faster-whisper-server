@@ -119,8 +119,8 @@ class Guidance(Stateful):
 
 class BaseAgentConfig(BaseSettings):
     model_config = SettingsConfigDict(cli_parse_args=False)
-    base_url: str = "https://api.mbodi.ai/v1"
-    auth_token: SecretStr = os.getenv("MBODI_API_KEY", "mbodi-demo-1")
+    base_url: str = Field(default="https://api.mbodi.ai/v1")
+    auth_token: SecretStr = Field(default_factory=lambda: SecretStr(os.getenv("MBODI_API_KEY", "mbodi-demo-1")))
 
 
 class CompletionConfig(Stateful):
@@ -130,6 +130,8 @@ class CompletionConfig(Stateful):
     reminder: str | None = Field(default=None, examples=["Remember to respond with only the translated text and nothing else."])
 
 class AgentConfig(BaseAgentConfig):
+    base_url: str = Field(default="https://api.mbodi.ai/v1")
+    auth_token: SecretStr = Field(default_factory=lambda: SecretStr(os.getenv("MBODI_API_KEY", "mbodi-demo-1")))
     model: str | None = Field(default=None)
     system_prompt: str | None = Field(default=None)
     completion_config: CompletionConfig = Field(default_factory=CompletionConfig)
