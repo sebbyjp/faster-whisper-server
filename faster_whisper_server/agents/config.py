@@ -122,7 +122,7 @@ class BaseAgentConfig(BaseSettings):
     auth_token: SecretStr = os.getenv("MBODI_API_KEY", "mbodi-demo-1")
 
 
-class CompletionConfig(Stateful, total=False):
+class CompletionConfig(Stateful):
     guidance: Guidance | None = Field(default=None, examples=[Guidance(choices=["Yes", "No"])])
     prompt_modifier: Callable[[str, State], str] | BaseAgentConfig | None = Field(default=None, description="A callable or agent that takes the prompt and state and returns a modified prompt.")
     response_modifier: Callable[[str, str, Union[State, None]], str] | BaseAgentConfig| None = Field(default=None, examples=[lambda prompt, response: prompt if response == "yes" else ""],
