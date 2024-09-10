@@ -1,9 +1,9 @@
 from collections.abc import Callable
 import os
-from typing import ParamSpec, Self, Union, dataclass_transform, overload
+from typing import ParamSpec, Self, Union, dataclass_transform, overload, Annotated
 
 from gradio.components import Component
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, SkipJsonSchema
 from pydantic.json_schema import JsonSchemaValue
 from pydantic.types import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -124,9 +124,8 @@ class BaseAgentConfig(BaseSettings):
 
 class CompletionConfig(Stateful):
     guidance: Guidance | None = Field(default=None, examples=[Guidance(choices=["Yes", "No"])])
-    prompt_modifier: Callable[[str, State], str] | BaseAgentConfig | None = Field(default=None, description="A callable or agent that takes the prompt and state and returns a modified prompt.")
-    response_modifier: Callable[[str, str, Union[State, None]], str] | BaseAgentConfig| None = Field(default=None, examples=[lambda prompt, response: prompt if response == "yes" else ""],
-        description="A callable or agent that takes the prompt, response, and state and returns a modified prompt.")
+    prompt_modifier: Annotated[Callable[[str, State], str] | BaseAgentConfig | None, SkipJsonSchema] = Field(default=None, description="A callable or agent that takes the prompt and state and returns a modified prompt.")
+    response_modifier: Annotated[Callable[[str, str, Union[State, None]], str] | BaseAgentConfig | None, SkipJsonSchema] = Field(default=None, description="A callable or agent that takes the prompt, response, and state and returns a modified prompt.")
     reminder: str | None = Field(default=None, examples=["Remember to respond with only the translated text and nothing else."])
 
 @dataclass_transform(order_default=False)
