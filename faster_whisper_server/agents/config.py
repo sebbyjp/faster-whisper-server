@@ -130,7 +130,7 @@ class CompletionConfig(Stateful):
     reminder: str | None = Field(default=None, examples=["Remember to respond with only the translated text and nothing else."])
 
 @dataclass_transform(order_default=False)
-class AgentConfig(BaseAgentConfig, ParamSpec):
+class AgentConfig(BaseAgentConfig):
     base_url: str = "https://api.mbodi.ai/v1"
     auth_token: str = "mbodi-demo-1"
     model: str | None = Field(default=None)
