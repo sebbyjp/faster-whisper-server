@@ -139,7 +139,7 @@ class AgentConfig(BaseAgentConfig, ParamSpec):
     stream_config: CompletionConfig | None = Field(default_factory=CompletionConfig)
     sub_agents: list["AgentConfig"] | None = Field(default=None)
     state: State = Field(default_factory=State)
-    gradio_io: Callable[Any | None, tuple[Component, Component]] = Field(default=None, description="The input and output components for the Gradio interface.")  # noqa: F821
+    gradio_io: Callable[[Any], tuple[Component, Component]] | None = Field(default=None, description="The input and output components for the Gradio interface.")
 
 
 """
