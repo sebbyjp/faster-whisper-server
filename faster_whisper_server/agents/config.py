@@ -3,7 +3,8 @@ import os
 from typing import ParamSpec, Self, Union, dataclass_transform, overload, Annotated
 
 from gradio.components import Component
-from pydantic import BaseModel, ConfigDict, Field, SkipJsonSchema
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.json_schema import SkipJsonSchema
 from pydantic.json_schema import JsonSchemaValue
 from pydantic.types import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
