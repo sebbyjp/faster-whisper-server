@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, BinaryIO
 import numpy as np
 import soundfile as sf
 
-from faster_whisper_server.config import SAMPLES_PER_SECOND
+from faster_whisper_server.audio_config import SAMPLES_PER_SECOND
 from faster_whisper_server.logger import logger
 
 if TYPE_CHECKING:
@@ -32,7 +32,7 @@ def audio_samples_from_file(file: BinaryIO) -> NDArray[np.float32]:
 class Audio:
     def __init__(
         self,
-        data: NDArray[np.float32] = np.array([], dtype=np.float32),
+        data: NDArray[np.float32] |NDArray[np.int16] = np.array([], dtype=np.int16),
         start: float = 0.0,
     ) -> None:
         self.data = data
@@ -53,7 +53,7 @@ class Audio:
         assert ts <= self.duration
         return Audio(self.data[int(ts * SAMPLES_PER_SECOND) :], start=ts)
 
-    def extend(self, data: NDArray[np.float32]) -> None:
+    def extend(self, data: NDArray[np.float32] | NDArray[np.int16]) -> None:
         # logger.debug(f"Extending audio by {len(data) / SAMPLES_PER_SECOND:.2f}s")
         self.data = np.append(self.data, data)
         # logger.debug(f"Audio duration: {self.duration:.2f}s")

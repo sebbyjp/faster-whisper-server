@@ -1,0 +1,36 @@
+{
+  "fft_size": 2048,                // Larger FFT size for better frequency resolution
+  "win_length": 2048,              // Window length should match FFT size for best results
+  "hop_length": 512,               // Smaller hop length for smoother transitions
+  "frame_shift_ms": null,
+  "frame_length_ms": null,
+  "stft_pad_mode": "reflect",
+  "sample_rate": 44100,            // Higher sample rate for better audio resolution
+  "resample": false,
+  "preemphasis": 0.97,             // Preemphasis can help emphasize higher frequencies
+  "ref_level_db": 20,
+  "do_sound_norm": true,           // Normalize volume to ensure consistent loudness
+  "log_func": "np.log10",
+  "do_trim_silence": true,         // Trim silence to remove unnecessary noise
+  "do_amp_to_db_linear": true,
+  "do_amp_to_db_mel": true,
+  "pitch_fmax": 760.0,             // Increase maximum pitch frequency to capture more detail
+  "pitch_fmin": 50.0,              // Minimum pitch frequency suitable for most audio
+  "trim_db": 40,                   // Set lower threshold for silence trimming
+  "do_rms_norm": true,             // RMS normalization for consistent dynamic range
+  "db_level": -23,                 // Lower dB level for natural volume (closer to human speech)
+  "power": 1.5,
+  "griffin_lim_iters": 100,        // More iterations for Griffin-Lim for higher quality reconstruction
+  "num_mels": 128,                 // More mel bands for higher resolution mel spectrogram
+  "mel_fmin": 0.0,
+  "mel_fmax": 16000.0,             // Set higher mel frequency range to capture more details
+  "spec_gain": 20,
+  "signal_norm": true,
+  "min_level_db": -100,
+  "symmetric_norm": true,
+  "max_norm": 4.0,
+  "clip_norm": true,
+  "stats_path": null,
+  // "model": "tts_models/multilingual/multi-dataset/your_tts"  // Use Tacotron 2 for high-quality speech synthesis
+
+}

@@ -1,3 +1,6 @@
 [submodule "faster_whisper_server/zenoh-python"]
   path = faster_whisper_server/zenoh-python
   url = https://github.com/mbodiai/zenoh-python
+[submodule "ros_agents"]
+	path = ros_agents
+	url = https://github.com/mbodiai/ros_agents.git

@@ -204,3 +204,4 @@ wrapt==1.16.0
 yarl==1.9.4
 openai==1.43.0
 mbodied==1.2.1
+yt-dlp==2024.8.6

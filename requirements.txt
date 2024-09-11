@@ -92,3 +92,6 @@ websockets==12.0
 bark==0.1.5
 pyannote.audio
 mrender==0.0.12
+pytube==15.0.0
+yt_dlp
+yt-dlp==2024.8.6

@@ -21,6 +21,8 @@ from rich.console import Console
 import soundfile as sf
 from TTS.api import TTS
 
+from faster_whisper_server.agents.instruct_config import instruct_agent
+from faster_whisper_server.agents.whisper_config import whisper_agent
 from faster_whisper_server.audio_config import AudioConfig
 from faster_whisper_server.audio_task import TaskConfig, handle_audio_stream
 from faster_whisper_server.colors import mbodi_color
@@ -92,11 +94,7 @@ and we are demonstrating your instruction following capabilities. Note that you 
 
 
 ### Weak Agent ###
-DETERMINE_INSTRUCTION_PROMPT = """
-Determine if the statement after POTENTIAL INSTRUCTION is an instruction for a robot to take action, other statement, or incomplete statement. Answer "Yes", "No", or "Incomplete".
 
-PORENTIAL INSTRUCTION:
-"""
 
 
 _agent_state: dict[str, Any] = {
@@ -172,13 +170,23 @@ if gr.NO_RELOAD:
     openai_client = OpenAI(base_url=f"{base_url}", api_key="cant-be-empty")
     http_client = httpx.Client(base_url=task.TRANSCRIPTION_ENDPOINT, timeout=TIMEOUT)
     from mbodied.agents import LanguageAgent
-
+    base_url = "https://api.mbodi.ai/audio/v1"
     agent = LanguageAgent(
         api_key=task.agent_token, model_kwargs={"base_url": task.agent_base_url}, context=SYSTEM_PROMPT
     )
     weak_agent = LanguageAgent(
         api_key=task.agent_token, model_kwargs={"base_url": task.agent_base_url}, context=SYSTEM_PROMPT
     )
+
+    base_url = "https://api.mbodi.ai/audio/v1"
+    agent = LanguageAgent(
+        api_key=task.agent_token, model_kwargs={"base_url": task.agent_base_url}, 
+        context=
+    )
+    weak_agent = LanguageAgent(
+        api_key=task.agent_token, model_kwargs={"base_url": task.agent_base_url}, context=SYSTEM_PROMPT
+    )
+
 
 
 NOT_A_COMPLETE_INSTRUCTION = "Not a complete instruction..."
@@ -280,106 +288,16 @@ def act(instruction: str, last_response: str, last_tps: str) -> Iterator[tuple[s
     update_state({"act_mode": "repeat", "response": response, "speak_mode": "speaking"})
     return response, f"TPS: {tokens_per_sec:.4f}"
 
-def speak(text: str, speaker: str, language: str) -> Iterator[tuple[bytes, str, dict]]:
-    """Generate and stream TTS audio using Coqui TTS with diarization."""
-    state = get_state()
-    console.print(f"speak STATE: {state}")
-    text = state["response"]
-    mode = state["speak_mode"]
-    sr = tts.synthesizer.output_sample_rate
-    spoken = state.get("spoken", "")
-
-    console.print(f"Text: {text}, Mode Speak: {mode} spoken {spoken}", style="red")
-    if not text:
-        return
-
-
-        # Check if this is a new response and reset spoken_idx
-    # if state["spoken"] == "" and state.setdefault("spoken_idx", 0) > 0:
-    #     console.print("New response detected, resetting spoken_idx to 0.", style="bold green")
-    #     update_state({"spoken_idx": 0})
-    # Handle incomplete sentences more gracefully
-    if text and len(text.split()) < 2 and not (text.endswith((".", "?", "!"))) and state["act_mode"] != "repeat":
-        return
-
-    if mode == "clear":
-        clear_states()
-        return
-    if mode == "wait":
-        return
-
-
-        # Split the text and keep the punctuation
-    sentences = [sentence.strip() + punct for sentence, punct in re.findall(r"([^.!?]*)([.!?])", text) if sentence.strip()]
-        # sentences = [*sentences]
-        # update_state({"sentences": sentences})
-    # spoken_idx = state.get("spoken_idx", 0)
-
-    console.print(f"Sentences: {sentences}, spoken_idx:, spoken: {spoken}", style="red")
-
-    # Speak each sentence
-    for idx, sentence in enumerate(sentences):
-        if sentence and sentence not in spoken:
-            print(f"Speaking sentence: {sentence}")
-
-            # Synthesize speech for the sentence
-            audio_array = (np.array(tts.tts(sentence, speaker=speaker, language=language, split_sentences=False)) * 32767).astype(np.int16)
-
-            if state["speak_mode"] == "clear":
-                clear_states()
-                return
-
-            # Log the sentence and mark the state as speaking
-            console.print(f"SPEAK Text: {sentence}, Mode Speak: {mode}", style="bold white on blue")
-            spoken += sentence
-            audio_seconds = len(audio_array) / float(sr)
-            console.print(f"Audio seconds: {audio_seconds}", style="bold white on blue")
-            # Update state
-            update_state({
-                "speak_mode": "speaking",
-                "spoken": spoken,
-                "audio_array": audio_array,
-                "act_mode": "repeat",
-                "spoken_idx": idx + 1,  # Move to the next sentence
-                "audio_finish_time": time() + audio_seconds,
-            })
-            # Save audio to file and yield audio output
-            f = f"out{idx}.wav"
-            sf.write(file=f, data=audio_array, samplerate=sr)
-            return f
-
-    # if spoken_idx >= len(sentences) - 1:
-
-    update_state({"speak_mode": "wait", "spoken": "", "audio_array": np.array([0], dtype=np.int16), "uncommitted": "", "response": "",
-                    "act_mode": "wait", 
-                    "audio_finish_time": float("inf"),
-                    "first_act": False,
-                    "pred_instr_mode": "predict", "transcription": "", "instruction": "",
-                    "sentences": [], "spoken_idx": 0,     "stream": np.array([])})
-
-    # console.print("Done speaking.", style="bold white on blue")
-    # Final check for completion
-    # if spoken_idx >= len(sentences) - 1:
-    #     update_state({"speak_mode": "wait", "spoken": "", "audio_array": np.array([0], dtype=np.int16),
-    #      "uncommitted": "", "act_mode": "wait",
-    #     "sentences": [], "spoken_idx": 0, "audio_finish_time": 0,     "stream": np.array([])})
-    #     console.print("Done speaking.", style="bold white on blue")
-    # if get_state()["speak_mode"] == "clear":
-    #     update_state({"speak_mode": "wait", "spoken": "", "audio_array": np.array([0], dtype=np.int16),
-    #      "uncommitted": "", "response": "", "act_mode": "wait", "pred_instr_mode": "predict",
-    #       "transcription": "", "instruction": "", "sentences": [], "spoken_idx": 0, "audio_finish_time": 0, "stream": np.array([])})
 
 
 
-
-def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Blocks:
+def create_gradio_demo(config: AudioConfig, task_config: TaskConfig, instruct_agent: AgentConfig) -> gr.Blocks:
     with gr.Blocks(
         theme=gr.themes.Soft(
             primary_hue=mbodi_color,
             secondary_hue="stone",
         ),
         title="Personal Assistant",
-        delete_cache=[0,0]
     ) as demo:
 
         def update_model_dropdown() -> gr.Dropdown:
@@ -394,23 +312,18 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
                 value=config.whisper.model,
             )
 
-        clear_button = gr.Button(value="Clear", render=True, variant="primary")
 
         with gr.Row():
-                audio = gr.Audio(
-                    label="Audio Input",
-                    type="numpy",
-                    sources=["microphone"],
-                    streaming=True,
-                    interactive=True,
-                )
-                audio_out = gr.Audio(streaming=False, autoplay=True, label="Output", visible=True, render=True, type="filepath")
+       
+                audio, audio_out = instruct_agent.gradio_io
                 model_dropdown = gr.Dropdown(
                     choices=[config.whisper.model],
                     label="Model",
                     value=config.whisper.model,
                     interactive=True,
                 )
+        with gr.Row():
+            clear_button = gr.Button(value="Clear", render=True, variant="primary")
         with gr.Row():
             with gr.Column():
                 first_speaker_name = gr.Dropdown(
@@ -484,7 +397,7 @@ def create_gradio_demo(config: AudioConfig, task_config: TaskConfig) -> gr.Block
             audio.stream(
                 fn=stream_audio,
                 inputs=[
-                    audio,
+                    
                     audio_state,
                     model_dropdown,
                 ],

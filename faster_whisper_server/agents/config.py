@@ -1,15 +1,19 @@
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 import os
-from typing import ParamSpec, Self, Union, dataclass_transform, overload, Annotated, Any
+from typing import Annotated, Any, ParamSpec, Self, Union, dataclass_transform, overload
 
 from gradio.components import Component
-from pydantic import BaseModel, ConfigDict, Field
-from pydantic.json_schema import SkipJsonSchema
-from pydantic.json_schema import JsonSchemaValue
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, computed_field
+from pydantic.annotated_handlers import GetCoreSchemaHandler
+from pydantic.config import ConfigDict
+from pydantic.json_schema import JsonSchemaValue, SkipJsonSchema
 from pydantic.types import SecretStr
+from pydantic_core.core_schema import CoreSchema, bool_schema, json_or_python_schema
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from rich import Console
 
 WEBSOCKET_URI="http://localhost:7543/v1/audio/transcriptions"
+
 
 
 """
@@ -74,15 +78,82 @@ The main configuration components are:
 
 """
 
+def Identity(x):
+    return x
+
+class CallableBool(int):
+    def __init__(self,  _bool: bool = False, func: Callable = Identity):
+        self.func = func
+        self._bool = int(_bool)
+
+    def __bool__(self):
+        return bool(self._bool)
+    def __call__(self):
+        return self.func()
+    
+    
+    @classmethod
+    def __get_pydantic_core_schema__(cls, source: type[BaseModel], handler: GetCoreSchemaHandler, /) -> CoreSchema:
+        """Hook into generating the model's CoreSchema.
+
+        Args:
+            source: The class we are generating a schema for.
+                This will generally be the same as the `cls` argument if this is a classmethod.
+            handler: A callable that calls into Pydantic's internal CoreSchema generation logic.
+
+        Returns:
+            A `pydantic-core` `CoreSchema`.
+        """
+        return handler(int)
+
+
+
+class CallableBool:
+    def __init__(self, _bool: bool = False, func: Callable = lambda: None):
+        self.func = func
+        self._bool = _bool
+
+    def __bool__(self):
+        return self._bool
+
+    def __call__(self):
+        return self.func()
+
+    def __int__(self):
+        return int(self._bool)
+
+
+    @property
+    def __pydantic_core_schema__(self) -> CoreSchema:
+        return bool_schema()
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls,
+        _source_type: Any,
+        _handler: Callable[[Any], CoreSchema],
+    ) -> CoreSchema:
+
+        return json_or_python_schema(
+                python_schema=bool_schema(),
+                json_schema={"type": "boolean"},
+            )
+    
+    @classmethod
+    def __get_json_core_schema__(cls, handler: GetCoreSchemaHandler, /) -> JsonSchemaValue:
+        return handler(bool)
+
 
 class Stateful(BaseModel):
     model_config = ConfigDict(extra="allow", arbitrary_types_allowed=True)
+    _cleared: bool = PrivateAttr(default=False)
+
     @overload
     def update(self, **kwargs) -> Self: ...
-    @overload
-    def update(self, data:dict) -> Self: ...
 
-    def update(self, data:dict | None = None, **kwargs) -> Self:
+    @overload
+    def update(self, data: dict) -> Self: ...
+
+    def update(self, data: dict | None = None, **kwargs) -> Self:
         """Update the state with the given data.
 
         Args:
@@ -93,12 +164,42 @@ class Stateful(BaseModel):
             Stateful: The updated state.
         """
         kwargs.update(data or {})
-        for key, value in data.items():
+        for key, value in kwargs.items():
             setattr(self, key, value)
 
-    def clear(self) -> Self:
+        return self
+    
+    def get(self, key: str, default: Any = None) -> Any:
+        return getattr(self, key, default)
+
+
+    def keys(self):
+        yield from [key for key in self.__dict__ if not key.startswith("_")]
+
+    def _clear_state(self):
+        self._cleared = True
         for key in self.keys():
             delattr(self, key)
+
+
+    @property
+    def clear(self) -> bool:
+        """Returns a CallableBool object that evaluates the cleared state."""
+        return CallableBool(self._cleared, self._clear)
+
+    def _clear(self):
+        self._cleared = True
+        for key in self.keys():
+            delattr(self, key)
+        self._cleared = True
+
+    def check_clear(self, other: "Stateful") -> bool:
+        """Check if other state is cleared, clear this state if it is, and return true if the state is cleared."""
+        if bool(other.clear):  # Ensure clear is evaluated as a boolean
+            self.clear()  # Call clear method if needed
+            return True
+        return False
+
 
 class State(Stateful):
     is_first: bool = Field(default=True)   
@@ -107,6 +208,9 @@ class State(Stateful):
     repeat: str | None = Field(default=None)
     persist: str | None = Field(default=None)
     last_response: str | None = Field(default=None)
+    clear: Any
+
+
 
 class Guidance(Stateful):
     choices: list[str] | None = Field(default=None, examples=[["Yes", "No"]])
@@ -118,7 +222,7 @@ class Guidance(Stateful):
 
 
 class BaseAgentConfig(BaseSettings):
-    model_config = SettingsConfigDict(cli_parse_args=False)
+    model_config = SettingsConfigDict(cli_parse_args=False, extra="allow", arbitrary_types_allowed=True)
     base_url: str = Field(default="https://api.mbodi.ai/v1")
     auth_token: SecretStr = Field(default_factory=lambda: SecretStr(os.getenv("MBODI_API_KEY", "mbodi-demo-1")))
 
@@ -146,27 +250,45 @@ Shared State is a dictionary that is shared between all the agents in the pipeli
 An example of shared state is the `clear` key that is used to clear the state of all the agents in the pipeline.
 """
 
-def persist_maybe_clear(_prompt:str, response:str | dict | tuple, local_state:State, shared_state:State | None = None) -> str:
-    """Useful to stabalize the response of the agent.
 
-    Convenience conventions for the response:
-    - Always assumes a tuple response is (response, state).
-    - A dict has "state" and "response" keys.
-    """
-    if shared_state.get("clear"):
-        shared_state.clear(), local_state.clear()
-        return ""
-    if isinstance(response, tuple):
-        response, new_update = response
-        local_state.update(new_update)
-    elif isinstance(response, dict):
-        local_state.update(response.get("state", {}))
-        local_state.update(latest_response=response.get("response", response))
+console = Console(style="bold yellow")
 
+def persist_maybe_clear(_prompt:str, response:str | dict | tuple | Generator[str | dict | tuple , None, None], local_state:State, shared_state:State | None = None) -> str:
+    """If the response is not a complete instruction, it will return the previous response. Useful to stabalize the response of the agent."""
+    def _persist_maybe_clear(_prompt:str, response:str | dict | tuple, local_state:State, shared_state:State | None = None) -> str:
+        print(f"Prompt: {_prompt}")
+        console.print(f"RESPONSE: {response}, LOCAL_STATE: {local_state}, SHARED_STATE: {shared_state}")
+        # return_response =  copy.deepcopy(response)
+        if local_state.check_clear(shared_state):
+            return ""
+        if isinstance(response, tuple):
+            response, new_update = response
+            local_state.update(response=response, new_update=new_update)
+        elif isinstance(response, dict):
+            local_state.update(response)
+            local_state.update(latest_response=response.get("response", response))
         
-    persist = local_state.get("persist", response)
-    return response if persist in response or persist in ("No audio yet...", "Not a complete instruction") else persist
 
+        print(f"persist in local_state: {local_state.persist}")
+        persist = local_state.get("persist", response) or ""
+        print(f"Persist: {persist}")
+        
+        final_response = response if persist in response or persist in ("No audio yet...", "Not a complete instruction") else persist
+        if final_response in ("Not enough audio yet.", "Not a complete instruction"):
+            shared_state.update(actor_status="wait")
+            return final_response
+            # if isinstance(response, dict):
+            #     return_response.clear()
+            #     return return_response
+            # return "", "" if isinstance(return_response, tuple) else return_response
+        shared_state.update(instruct_states="ready")
+        return final_response
+        # return final_response, new_update if isinstance(response, tuple) else final_response
+    if not isinstance(response,Generator):
+        return _persist_maybe_clear(_prompt, response, local_state, shared_state)
+    for chunk in response:
+        console.print(f"Chunk: {chunk}", style="bold green")
+        yield _persist_maybe_clear(_prompt, chunk, local_state, shared_state)
 
 
 
