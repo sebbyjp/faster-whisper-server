@@ -21,8 +21,8 @@ from rich.console import Console
 import soundfile as sf
 from TTS.api import TTS
 
-from faster_whisper_server.agents.instruct_config import instruct_agent
-from faster_whisper_server.agents.whisper_config import whisper_agent
+from faster_whisper_server.agents.instruct_agent import InstructAgent
+from faster_whisper_server.agents.whisper_agent import WhisperAgent
 from faster_whisper_server.audio_config import AudioConfig
 from faster_whisper_server.audio_task import TaskConfig, handle_audio_stream
 from faster_whisper_server.colors import mbodi_color
@@ -181,7 +181,7 @@ if gr.NO_RELOAD:
     base_url = "https://api.mbodi.ai/audio/v1"
     agent = LanguageAgent(
         api_key=task.agent_token, model_kwargs={"base_url": task.agent_base_url}, 
-        context=
+        context=SYSTEM_PROMPT
     )
     weak_agent = LanguageAgent(
         api_key=task.agent_token, model_kwargs={"base_url": task.agent_base_url}, context=SYSTEM_PROMPT

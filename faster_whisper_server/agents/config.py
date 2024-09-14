@@ -1,80 +1,120 @@
 from collections.abc import Callable, Generator
 import os
-from typing import Annotated, Any, ParamSpec, Self, Union, dataclass_transform, overload
+from typing import Annotated, Any, Final, Literal, NamedTuple, ParamSpec, Self, Union, dataclass_transform, overload
 
 from gradio.components import Component
-from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, computed_field
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, model_serializer, model_validator
 from pydantic.annotated_handlers import GetCoreSchemaHandler
-from pydantic.config import ConfigDict
-from pydantic.json_schema import JsonSchemaValue, SkipJsonSchema
+from pydantic.json_schema import JsonSchemaValue
 from pydantic.types import SecretStr
 from pydantic_core.core_schema import CoreSchema, bool_schema, json_or_python_schema
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from rich import Console
+from rich.console import Console
 
 WEBSOCKET_URI="http://localhost:7543/v1/audio/transcriptions"
 
 
 
 """
-The logic of Embodied Agents V2 is not unsimilar to general concurrent programming. Every agent has a responsibility, a local state, 
-a shared state, and completion configuration for querying an endpoint. The novelty of this framework
-is that emphasis is placed on control flow rather than data flow. Consider the following problem statement of real-time autonomous systems:
+# Embodied Agents V2: Concurrent Programming for Real-Time Autonomous Systems
 
-**How can you make the best decision in the least amount of time, using only the information you have available?**
+Embodied Agents V2 applies concurrent programming principles to real-time autonomous systems, emphasizing control flow over data flow. This framework addresses two key challenges:
 
-We can break this down into two subproblems:
+1. Minimizing the information required for decision-making
+2. Maximizing decision quality
 
-1. Minimizng the required information to make a decision.
-2. Maximizing the quality of the decision.
+## Core Concepts
 
-One can immediately notice that the problem of concurrency is quite ubiquitous. From low level multiprocessing with
-context management, to handling user sessions, to desiging a RAG system, at its core, the problem is just safely
-updating a **State** with multiple operators and passing as little context as possible through  **State Transition**s.
+Each agent in the system has:
 
-The true challenge is, as it always has been, scale. Robotics, however, is unique in this  one needs to reach truly massive levels
-of synchronized concurrency for just a single embodiment. Image scheduling a zoom call between just 10
-people who all need to do a certain task based on the results of everyone else's task and if one person fails,
-the whole system fails. Oh and the whole group needs to do this at least 10 times a second.
+- • A specific responsibility
+- • A local state
+- • Access to a shared state
+- • A completion configuration for querying endpoints
 
-You may wonder, isn't that just what normal websites are doing which is even faster and handles more processes? Yes... and no. 
-The difference is the complexity or richness of the data that is being sent and operated on. It must be sent
+## Concurrency in Robotics
 
-1. Exactly correctly.
-2. Fast Enough to make a cognitive decision.
+Robotics demands high levels of synchronized concurrency. Unlike simple network operations, embodied agents must:
 
-A cell network doesnt use much brain power to decide what phone to send a text to. But
-an embodied agent needs to think about what to do next for each individual part of the outside world,
-its internal state, monitor its progress, have fail safes, and all around as fast as you are able to move your hand.
+- • Process complex, rich data
+- • Make cognitive decisions rapidly
+- • Coordinate multiple system components in real-time
 
-For example, a web server may have no need for a real-time shared state but an embodied collective of agents
-MUST stop moving its hand before it hits the table. So instead of considering topologies or specific communication patterns like
-server/client or pub/sub, we define only the FSM and the transitions. Any message passing or network protocol can
-be hooked up with currently http, grpc, websockets, and ROS currently supported.
+## Framework Design
 
-The benefit of using AgentsV2 is that every piece of data is backed by a pydantic schema and conversion methods to any
-other data type you will likely need. Some of the most common include:
+Instead of focusing on specific communication patterns, Embodied Agents V2 defines:
 
-- Numpy, Torch, and TF Tensors
-- JSON, msgpack, Protobuf
-- Gym Environment
-- RLDS Dataset
-- ROS2 Message
-- Apache Arrow Flight Compatible GRPC
-- LeRobot, HuggingFace and PyArrow Tables
-- VLLM MultiModal Data Input
-- Gradio Input and Output
+- • Finite State Machines (FSM)
+- • State transitions
+
+This approach allows flexibility in message passing and network protocols, supporting HTTP, gRPC, WebSockets, and ROS.
+
+## Data Handling
+
+AgentsV2 uses Pydantic schemas for all data, offering conversion methods to various formats including:
+
+- • Numpy, Torch, and TensorFlow tensors
+- • JSON, msgpack, Protobuf
+- • Gym Environment
+- • RLDS Dataset
+- • ROS2 Messages
+- • Apache Arrow Flight Compatible gRPC
+- • LeRobot, HuggingFace, and PyArrow Tables
+- • VLLM MultiModal Data Input
+- • Gradio Input and Output
+
+## Key Components
+
+The main configuration components include:
+
+- • Shared State: A dictionary for information shared across agents
+- • Local State: Agent-specific state information
+- • Modifiers: Functions or agents that modify prompts, responses, or states
+
+## Implementation
+
+The provided code outlines the core classes and configurations for implementing Embodied Agents V2:
+
+- • Stateful and State classes for managing agent states
+- • Guidance class for providing decision-making parameters
+- • BaseAgentConfig and AgentConfig for setting up agent configurations
+- • CompletionConfig for specifying how agents interact with endpoints
 
 
 ------------------------------------------------------------------------------------------------------------------------------------
+    The Decorator (maybe_override_state_dict)
 
-The following code can be used as a boiler plate for creating a new agent. For real-time generative intelligence.
+    The decorator is responsible for ensuring that every method that uses it (like on_stream_resume, on_stream_yield, on_completion_start, on_completion_finish) automatically injects the agent’s local_state and shared_state as keyword arguments into the function. This means the decorator abstracts away the need for the developer to manually manage state injection in these methods.
 
-The main configuration components are:
+    Key Benefits of the Decorator:
 
-- **Shared State**: A dictionary that stores a shared state between all the agents in the pipeline. It is used to store information that is needed by multiple agents.
-- **Local State**: A dictionary that stores the state of the agent. It is takes precedence over the shared state for conflicting keys.
-- **Modifiers**: A function or agent that takes the prompt, response, and state and modifies it such as filtering, persisting, or updating a state.
+        •	State management abstraction: It simplifies the methods that require state by automatically passing local_state and shared_state.
+        •	Centralized state injection: Makes it easy to inject shared logic around state handling without repeating it for each method.
+        •	Separation of concerns: Keeps the method signatures clean, focusing on the task rather than managing the state.
+
+    The Hooks (on_stream_resume, on_stream_yield, on_completion_start, on_completion_finish)
+
+    These methods act as hooks that allow you to customize or override the behavior at different stages of the agent’s lifecycle, such as:
+
+        •	Before sending the prompt (on_completion_start).
+        •	After receiving a response (on_completion_finish).
+        •	During stream handling (on_stream_resume, on_stream_yield).
+
+    Each hook has specific logic, such as modifying prompts or responses using the provided CompletionConfig, based on runtime configurations like prompt_modifier or response_modifier.
+
+    Key Benefits of Hooks:
+
+        •	Customization: These hooks enable behavior modification at specific points in the agent’s interaction cycle.
+        •	Dynamic logic: Based on runtime configurations (prompt_modifier, response_modifier), you can dynamically alter the flow without modifying the base logic of the agent.
+
+    Are Both Necessary?
+
+    The decorator and the hooks serve complementary but distinct purposes:
+
+        1.	The Decorator: Abstracts state handling, reducing code duplication and ensuring consistency across all methods where the state is required.
+        2.	The Hooks: Provide a way to customize or modify behavior at key points of the agent’s lifecycle. They process data (like prompts or responses) based on configuration and user inputs.
+
+    If you only need automatic state injection and your logic for modifying prompts or responses is static, you could potentially handle everything with just the decorator. But if you need dynamic behavior modification (e.g., handling different prompt modifications based on configuration), the hooks are essential.
 
 """
 
@@ -137,7 +177,7 @@ class CallableBool:
                 python_schema=bool_schema(),
                 json_schema={"type": "boolean"},
             )
-    
+
     @classmethod
     def __get_json_core_schema__(cls, handler: GetCoreSchemaHandler, /) -> JsonSchemaValue:
         return handler(bool)
@@ -168,10 +208,11 @@ class Stateful(BaseModel):
             setattr(self, key, value)
 
         return self
-    
-    def get(self, key: str, default: Any = None) -> Any:
-        return getattr(self, key, default)
 
+    def get(self, key: str, default: Any = None) -> Any:
+        if key in self.keys():
+            return getattr(self, key)
+        return default
 
     def keys(self):
         yield from [key for key in self.__dict__ if not key.startswith("_")]
@@ -181,16 +222,23 @@ class Stateful(BaseModel):
         for key in self.keys():
             delattr(self, key)
 
+    def __setitem___(self, key, value) -> None:
+        if not isinstance(key, str):
+            raise TypeError(f"Key must be a string, not {type(key).__name__}")
+        setattr(self, key, value)
+        super().__setattr__(key, value)
+
 
     @property
     def clear(self) -> bool:
         """Returns a CallableBool object that evaluates the cleared state."""
         return CallableBool(self._cleared, self._clear)
 
-    def _clear(self):
+    def _clear(self) -> None:
         self._cleared = True
         for key in self.keys():
-            delattr(self, key)
+            if not key.startswith("_") and key not in ("model_config", "clear"):
+                delattr(self, key)
         self._cleared = True
 
     def check_clear(self, other: "Stateful") -> bool:
@@ -200,9 +248,8 @@ class Stateful(BaseModel):
             return True
         return False
 
-
 class State(Stateful):
-    is_first: bool = Field(default=True)   
+    is_first: bool = Field(default=True)
     is_terminal: bool = Field(default=False)
     wait: bool = Field(default=False)
     repeat: str | None = Field(default=None)
@@ -211,15 +258,25 @@ class State(Stateful):
     clear: Any
 
 
+    def __setitem___(self, key, value) -> None:
+        if not isinstance(key, str):
+            raise TypeError(f"Key must be a string, not {type(key).__name__}")
+        setattr(self, key, value)
+        super().__setattr__(key, value)
+
+    def get(self, key: str, default: Any = None) -> Any:
+        if key in self.keys():
+            ret = getattr(self, key)
+            return ret if ret is not None else default
+        return default
 
 class Guidance(Stateful):
-    choices: list[str] | None = Field(default=None, examples=[["Yes", "No"]])
-    json_schema: str | dict | JsonSchemaValue | None = Field(
+    guided_choice: list[str] | None = Field(default=None, examples=[["Yes", "No"]])
+    guided_json: str | dict | JsonSchemaValue | None = Field(
       default=None,
       description="The json schema as a dict or string.",
       examples=[{"type": "object", "properties": {"key": {"type": "string"}}}],
     )
-
 
 class BaseAgentConfig(BaseSettings):
     model_config = SettingsConfigDict(cli_parse_args=False, extra="allow", arbitrary_types_allowed=True)
@@ -228,9 +285,9 @@ class BaseAgentConfig(BaseSettings):
 
 
 class CompletionConfig(Stateful):
-    guidance: Guidance | None = Field(default=None, examples=[Guidance(choices=["Yes", "No"])])
-    prompt_modifier: Annotated[Callable[[str, State], str] | BaseAgentConfig | None, SkipJsonSchema] = Field(default=None, description="A callable or agent that takes the prompt and state and returns a modified prompt.")
-    response_modifier: Annotated[Callable[[str, str, Union[State, None]], str] | BaseAgentConfig | None, SkipJsonSchema] = Field(default=None, description="A callable or agent that takes the prompt, response, and state and returns a modified prompt.")
+    guidance: Guidance | None = Field(default=None, examples=[Guidance(guided_choice=["Yes", "No"])])
+    prompt_modifier: str | Callable[[str, State], str] | BaseAgentConfig | None= Field(default=None, description="A callable or agent that takes the prompt and state and returns a modified prompt.")
+    response_modifier: str | Callable[[str, str, State | None], str] | BaseAgentConfig | None = Field(default=None, description="A callable or agent that takes the prompt, response, and state and returns a modified prompt.")
     reminder: str | None = Field(default=None, examples=["Remember to respond with only the translated text and nothing else."])
 
 class AgentConfig(BaseAgentConfig):
@@ -242,7 +299,7 @@ class AgentConfig(BaseAgentConfig):
     stream_config: CompletionConfig | None = Field(default_factory=CompletionConfig)
     sub_agents: list["AgentConfig"] | None = Field(default=None)
     state: State = Field(default_factory=State)
-    gradio_io: Callable[[Any], tuple[Component, Component]] | None = Field(default=None, description="The input and output components for the Gradio interface.")
+    io: Callable[[Any], tuple[Component, Component]] | None = Field(default=None, description="The input and output components for the Gradio interface.")
 
 
 """
@@ -255,40 +312,38 @@ console = Console(style="bold yellow")
 
 def persist_maybe_clear(_prompt:str, response:str | dict | tuple | Generator[str | dict | tuple , None, None], local_state:State, shared_state:State | None = None) -> str:
     """If the response is not a complete instruction, it will return the previous response. Useful to stabalize the response of the agent."""
+
     def _persist_maybe_clear(_prompt:str, response:str | dict | tuple, local_state:State, shared_state:State | None = None) -> str:
-        print(f"Prompt: {_prompt}")
-        console.print(f"RESPONSE: {response}, LOCAL_STATE: {local_state}, SHARED_STATE: {shared_state}")
-        # return_response =  copy.deepcopy(response)
         if local_state.check_clear(shared_state):
             return ""
         if isinstance(response, tuple):
-            response, new_update = response
-            local_state.update(response=response, new_update=new_update)
-        elif isinstance(response, dict):
-            local_state.update(response)
-            local_state.update(latest_response=response.get("response", response))
-        
+            text_response, other = response
+            persist, persist_other = local_state.get("last_response", response)
+        should_persist = persist in text_response or persist not in ("No audio yet...", "Not a complete instruction")
+        if should_persist:
+            local_state.update(last_response=(text_response, other))
+            return response
+        local_state.update(last_response=response)
+        return persist[0] + " " + text_response, other
 
-        print(f"persist in local_state: {local_state.persist}")
-        persist = local_state.get("persist", response) or ""
-        print(f"Persist: {persist}")
-        
-        final_response = response if persist in response or persist in ("No audio yet...", "Not a complete instruction") else persist
-        if final_response in ("Not enough audio yet.", "Not a complete instruction"):
-            shared_state.update(actor_status="wait")
-            return final_response
-            # if isinstance(response, dict):
-            #     return_response.clear()
-            #     return return_response
-            # return "", "" if isinstance(return_response, tuple) else return_response
-        shared_state.update(instruct_states="ready")
-        return final_response
-        # return final_response, new_update if isinstance(response, tuple) else final_response
+
     if not isinstance(response,Generator):
+        return response
         return _persist_maybe_clear(_prompt, response, local_state, shared_state)
+    previous_response = local_state.get("last_response", "")
+
     for chunk in response:
-        console.print(f"Chunk: {chunk}", style="bold green")
-        yield _persist_maybe_clear(_prompt, chunk, local_state, shared_state)
+        console.print(f"Chunk: {str(chunk)}", style="bold green")
+        if isinstance(chunk, tuple) and not any(i is None for i in chunk):
+            previous_response, other = previous_response + " " + chunk[0], chunk[1]
+            print(f"Previous Response: {previous_response}")
+            print(f"chunk: {chunk}, other: {other}")
+            persist, persist_other = local_state.get("last_response", chunk)
+            chunk = (persist[0] + " " + chunk[0], other)
+            local_state.update(last_response=chunk)
+        # committed_response = _persist_maybe_clear(_prompt, chunk, local_state, shared_state)
+        yield chunk
+    return
 
 
 
